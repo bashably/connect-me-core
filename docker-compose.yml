@@ -1,5 +1,5 @@
-# this file is meant to setup just the environment systems (e.g. database).
-# It is used for testing purposes locally or on GitHub.
+# this file is meant for deployment.
+# It performs a setup of the environment systems (e.g. database) and the core itself.
 
 version: "3.9"
 services:
@@ -22,3 +22,14 @@ services:
       interval: 1s
       timeout: 10s
       retries: 20
+
+  # core application server
+  core:
+    build: .
+    ports:
+      - "8080:8080"
+    links:
+      - db
+    depends_on:
+      db:
+        condition: service_healthy
