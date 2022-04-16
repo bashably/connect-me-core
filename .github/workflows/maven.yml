@@ -2,9 +2,9 @@ name: Maven test and build using docker-compose
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "**" ]
 
 jobs:
   build:
