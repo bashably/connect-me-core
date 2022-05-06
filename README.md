@@ -22,6 +22,8 @@ docker-compose -f docker-compose-environment.yml build
 # in order to setup environment systems (will run in background)
 docker-compose -f docker-compose-environment.yml up -d
 
+# ... wait a few seconds for database setup to complete ...
+
 ## EXECUTE IN ORDER TO RUN UNIT TESTS
 # in order to build and run unit tests using maven
 mvn test
@@ -31,4 +33,14 @@ mvn test
 docker-compose -f docker-compose-environment.yml down
 # you dont need to restart the testing environment every time.
 ```
+
+# Documentation
+The Documentation is stored in directory `documentation` as a **LogSeq Graph**.
+
+In order to open this LogSeq Graph, download LogSeq [here](http://www.logseq.com) and open the directory with it.
+
+## LogSeq Introduction
+LogSeq works just like an advanced Wiki: It supports interlinked pages written in Markdown. It allows you 
+to structure and present information. You can view the connection between different pages as a graph 
+and add new pages to it.
 

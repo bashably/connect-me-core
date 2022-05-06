@@ -1,0 +1,15 @@
+- Congrats, you successfully managed to open the project documentation in LogSeq and completed step 1 of this onboarding ✔️
+- 🔥 Here you'll learn everything you need to get started 🔥
+- But first, read our [[How-To-Develop]] page. There you'll find all goals and rules we set ourselves in order to develop a great app 📖📱
+- # What we use 💻
+	- The Frontend (App that you can download on your phone) is written in **Flutter** {{cloze an cross platform app framework that runs with native speed on any device. That means we can develop an app once and run it everywhere 🔥}} and **Dart** 🎯 {{cloze a programming language that runs almost everywhere and is similar to Java}}
+	- The Backend (Server) is written in **Java** ☕ using the **Spring Boot Framework** and Maven {{cloze for building and testing our server}} .
+	- We also use Docker {{cloze a container management system that helps us deploying and testing the server backend}} and Git(-Hub)
+	- You can develop in any IDE you want, this technology stack is very flexible 🎈
+-
+- Make sure to download the following 🖥️
+	- An IDE or Editor of your choise {{cloze such as VSCode, IntelliJ, Eclipse}}
+	- [JDK 11+](https://www.oracle.com/java/technologies/downloads/)
+	- [Maven](https://maven.apache.org/download.cgi) (Download Binary .zip archive)
+	- [Docker](https://www.docker.com/products/docker-desktop/)
+	- [Flutter SDK](https://docs.flutter.dev/get-started/install?gclid=Cj0KCQjwl7qSBhD-ARIsACvV1X1GtmkrDm494JkGjCd3PwkwwqEqD3jELjH2AnZk38CV6OsNa_NgRzkaAtVBEALw_wcB&gclsrc=aw.ds) includes Dart SDK

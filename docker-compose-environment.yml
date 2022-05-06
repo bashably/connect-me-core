@@ -12,7 +12,8 @@ services:
       MYSQL_PASSWORD: KABvy6sW3FkVzqrmTFndxD7Yu
       MYSQL_DATABASE: CoreDB
       MYSQL_ROOT_PASSWORD: u68cczRLRAzbu2thZGccjGC7JdnpttaS
-
+    ports:
+      - "3306:3306"
     volumes:
       # setup.sql will be loaded and executed at startup
       - ./src/main/resources/setup.sql:/docker-entrypoint-initdb.d/setup.sql

@@ -9,5 +9,4 @@ public class ConnectMeCoreApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ConnectMeCoreApplication.class, args);
 	}
-
 }

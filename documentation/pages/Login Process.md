@@ -1,0 +1,27 @@
+- # Important
+	- Simple math: **each login costs money** (because of phone number verification) => minimize overall re-logins. For example at server restart => implement login state that **persists** (don't forget logged in users at server restart)
+	-
+- # Steps
+	- 1) user starts the login process
+	- 2) user enters login data (username, password)
+	- 3) if login data is correct: user verifies his phone number
+	- 4) if phone number verification successful: user is logged in
+- # Process vulnerabilities and counter actions
+	- ## Inputs of the clumsy user
+		- Wrong username => Try to fetch user and his password(-hash) by username
+		- Wrong password => Compare password-hashes
+		- Wrong verification code => retry verification
+	- ## Actions of the clumsy user
+		- Abort login mid-process => reset/re-init login at next attempt
+	- ## Inputs of the evil user
+		- SQL-Injection => backend of JPA uses prepared statements
+		- Log-Injection => ^^Do not log unverified user input^^
+	- ## Actions of the evil user
+		- TODO brute force usernames and passwords
+		- Repeat verification process infinite times => restrict attempts per time (**Verification Block**)
+			- e.g. limit of 3 attempts. User will be blocked for 5mins after those
+		- Bypass verification block by restarting (=resetting) statefulRegistrationBean process => keep statefulRegistrationBean object in session and check if process restart/reset is allowed
+- # API
+	- {{embed [[Login API]]}}
+- # Authentication
+	- {{embed [[Authentication]]}}

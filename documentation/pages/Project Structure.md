@@ -1,0 +1,17 @@
+- The Project Structure is **Component Oriented**
+	- Features are organized into components (component=feature implementation) => Each domain of the application gets its own component (e.g. `chat`, `userManagement`, `feeds`)
+	- Each component (like the `userManagement` package) has
+		- a `package-info.java` => ^^description of the component purpose and other notes^^
+		- an _^^component interface^^_ such as `UserManagement` => Access to main package functionality from the _outside_ (=other components). {{cloze this is a best practice in the component oriented model. It allows multiple implementations and regulated access to component functionality}}
+		- An implementation of the _component interface_ (in this example `impl.jpa.JpaUserManagement`)
+		- sub-packages for Exceptions, APIs, Entities
+- ![image.png](../assets/image_1649332547151_0.png){:height 547, :width 540}
+- Every component gets its own Java package.
+- # Advantages
+	- Each domain of the application has its own package => Code becomes more manageable
+	- Components can be re-implemented just by adding another implementation to the interface
+	- Components can be seen as their own little projects, creating a smaller and more manageable scope for the programmer which is accessible through the component interface.
+	- In the future each component could be extracted out of the monolith and build as its own service
+- # Disadvantages
+	- Use of interfaces and multiple possible implementations => Complexity
+	-

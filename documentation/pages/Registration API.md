@@ -1,0 +1,67 @@
+- see [[Registration Process]] for rules and further explaination
+- # Initialize or reset registration is session (Step 1)
+	- POST `/users/registration/init`
+	- No payload, just call
+	- ### Responses
+		- `OK` => Success
+		- `FORBIDDEN` => You are not allowed to reset or init a new registration {{cloze maybe there is a failed or still pending verification}}
+	- ### Actions
+		- If there is no registration currently in session, create one.
+		- if there is already a registration in session, try to abort and reset it.
+	- ### Patched Vulnerabilities
+		- reset/re-init `StatefulRegistrationBean` in session when not allowed (e.g. while in [verification block](((62542000-13cc-4331-be2f-931eab1c896c))) ) => Check if reset allowed
+- # Set user data (Step 2)
+	- POST `/users/registration/set/userdata`
+	- ### Payload
+		- user data in `application/json` format
+		- ```json
+		  {
+		    "username": "myusename",
+		    "password": "clear-text-password",
+		    "phoneNumber": "0 000 00000"
+		  }
+		  ```
+	- ### Responses
+		- `OK` => Data checked and seccessfully set
+		- `BAD REQUEST` => Payload data in invalid or tests have failed {{cloze username not allowed, password too weak, invalid phone number, ...}}
+		- `CONFLICT` => Username already exists OR phone number is already taken
+		- `FORBIDDEN` => This interaction is not allowed in this registration step
+	- ### Actions
+		- Check all passed values and store them in session for later verification
+	- ### Patched Vulnerabilities
+		- pass invalid/malicious/unacceptable user data => input check/verification
+		- set user data again after verification process => check state
+		- TODO payload too _heavy_ => Restrict content size of HTTP request
+- # Start verification process (Step 3)
+	- POST `/users/registration/start/verify`
+	- No payload, just call
+	- ### Responses
+		- `OK` => Success, verification code has been sent to the passed number
+		- `FORBIDDEN` => You are currently not allowed to start the verification process {{cloze maybe the user exceeded the verification attempt limit and has to wait for a few minutes.}}
+	- ### Actions
+		- Generate Verification code and store it in session
+		- Wait for verification code passed by user
+	- ### Patched Vulerabilities
+		- start verification process even though it's not allowed => check if another verification attempt is allowed
+- # Send verification code (Step 4)
+	- POST `/users/registration/verify`
+	- ### Payload
+		- verification code in `text/plain` format
+	- ### Responses
+		- `OK` => Success, user passed correct code and is now verified
+		- `FORBIDDEN` => This interaction is not allowed in this registration step
+		- `BAD_REQUEST` => Verification failed {{cloze user passed wrong verification code}}
+	- ### Actions
+		- Check if passed verification code equals actual verification code
+			- Yes: Create user object from registration and persist it
+			- No: increase failed attempt counter and return to Step 2 {{cloze the user has to call Step 3 (start verification process) and try again}} (see process documentation)
+	- ### Patched Vulnerabilities
+		- TODO payload too _heavy_ => Restrict content size of HTTP request
+	-
+- # Check username
+	- POST `/users/registration/check/username`
+	- ### Payload
+		- suggested username in `text/plain` format
+	- ### Responses
+		- `OK` => Username is available and valid
+		- `FORBIDDEN` => Username is not allowed or taken
