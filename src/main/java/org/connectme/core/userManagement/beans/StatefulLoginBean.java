@@ -29,6 +29,7 @@ public class StatefulLoginBean {
 
     private final Logger log = LogManager.getLogger(StatefulLoginBean.class);
 
+
     @Autowired
     private UserManagement userManagement;
 

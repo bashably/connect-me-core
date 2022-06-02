@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class TestInterestData {
 
-    private static List<Interest> interests = new LinkedList<>();
+    private static final List<Interest> interests = new LinkedList<>();
 
 
     static {

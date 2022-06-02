@@ -21,10 +21,12 @@ public class Interest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @SuppressWarnings("unused")
     @Column(name = "created_on")
     @CreationTimestamp
     private LocalDateTime createdOn;
 
+    @SuppressWarnings("unused")
     @Column(name = "last_update_on")
     @UpdateTimestamp
     private LocalDateTime updatedOn;

@@ -6,7 +6,7 @@ import org.connectme.core.WebMvcConfiguration;
 import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.entities.User;
-import org.connectme.core.userManagement.exceptions.FailedAuthenticationException;
+import org.connectme.core.authentication.exception.FailedAuthenticationException;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

@@ -44,16 +44,8 @@ public class InterestTerm {
         return languageCode;
     }
 
-    public void setLanguageCode(String languageCode) {
-        this.languageCode = languageCode;
-    }
-
     public String getTerm() {
         return term;
-    }
-
-    public void setTerm(String term) {
-        this.term = term;
     }
 
     public Interest getRoot() {

@@ -2,7 +2,6 @@ package org.connectme.core.interests.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.authentication.filter.UserAuthenticationFilter;
 import org.connectme.core.interests.Interests;
 import org.connectme.core.interests.entities.Interest;
@@ -25,9 +24,6 @@ public class InterestAPI {
 
     @Autowired
     private Interests interests;
-
-    @Autowired
-    private UserAuthenticationBean authenticationBean;
 
     @Autowired
     private InterestRepository interestRepository;

@@ -31,7 +31,7 @@ public class InterestsTests {
     private UserManagement userManagement;
 
     @BeforeEach
-    private void prepare() throws Exception {
+    private void prepare() {
         // fill repository
         interestRepository.deleteAll();
         interestTermRepository.deleteAll();
@@ -41,11 +41,10 @@ public class InterestsTests {
     /**
      * Interest terms can be searched by their content. Search a term by its value and assert that the same interest
      * term was returned.
-     * @throws Exception test failed
      * @author Daniel Mehlber
      */
     @Test
-    public void searchInterestTerms() throws Exception {
+    public void searchInterestTerms() {
         // -- arrange --
         final InterestTerm interestTerm = TestInterestData.getRandomInterestTerm(interestTermRepository);
         final String term = interestTerm.getTerm();

@@ -1,5 +1,6 @@
 package org.connectme.core;
 
+
 import org.connectme.core.authentication.filter.UserAuthenticationFilter;
 import org.connectme.core.global.interceptors.LoggingContextExtractor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,12 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Autowired
     UserAuthenticationFilter userAuthenticationFilter;
 
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loggingDataFilter);
     }
+
 
     @Bean
     public FilterRegistrationBean<UserAuthenticationFilter> addAuthenticationFilter() {
@@ -32,4 +35,5 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         registration.setOrder(2);
         return registration;
     }
+
 }

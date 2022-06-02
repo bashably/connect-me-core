@@ -1,13 +1,14 @@
-package org.connectme.core.userManagement.api;
+package org.connectme.core.tests.userManagement.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
+import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -252,7 +253,6 @@ public class RegistrationAPITest {
                         .content(json)
                         .session(session))
                 .andExpect(status().isOk());
-
 
         // 3) exceed the maximum amount of verification attempts
         for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {

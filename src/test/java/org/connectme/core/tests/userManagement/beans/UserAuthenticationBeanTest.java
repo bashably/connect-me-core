@@ -1,7 +1,8 @@
-package org.connectme.core.userManagement.beans;
+package org.connectme.core.tests.userManagement.beans;
 
 import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.global.exceptions.InternalErrorException;
+import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
@@ -10,7 +11,6 @@ import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.connectme.core.userManagement.exceptions.UsernameAlreadyTakenException;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

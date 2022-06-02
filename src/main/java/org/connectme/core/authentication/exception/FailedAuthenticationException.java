@@ -1,4 +1,4 @@
-package org.connectme.core.userManagement.exceptions;
+package org.connectme.core.authentication.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

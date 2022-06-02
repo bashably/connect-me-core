@@ -20,6 +20,7 @@ import java.util.UUID;
 @Component
 public class LoggingContextExtractor implements HandlerInterceptor {
 
+
     @SuppressWarnings("RedundantThrows")
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -34,11 +35,13 @@ public class LoggingContextExtractor implements HandlerInterceptor {
     }
 
 
+
     @SuppressWarnings("RedundantThrows")
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         MDC.clear();
     }
+
 
     @SuppressWarnings("RedundantThrows")
     @Override

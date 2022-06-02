@@ -17,4 +17,3 @@
 - # Components
 	- [[User Management Component]] for all interactions with users
 	- [[Interest Management Component]] for managing the core of this application: interests
-	-

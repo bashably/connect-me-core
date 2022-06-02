@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.User;
-import org.connectme.core.userManagement.exceptions.FailedAuthenticationException;
+import org.connectme.core.authentication.exception.FailedAuthenticationException;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.UserDataInsufficientException;
 import org.springframework.beans.factory.annotation.Autowired;

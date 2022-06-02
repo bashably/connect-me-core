@@ -25,11 +25,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = true)
+@AutoConfigureMockMvc()
 public class InterestAPITest {
 
     @Autowired
@@ -84,7 +83,8 @@ public class InterestAPITest {
                 .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
 
         // -- assert
-        List<InterestTerm> interestTerms = new ObjectMapper().readValue(jsonResult, new TypeReference<List<InterestTerm>>() {});
+        List<InterestTerm> interestTerms = new ObjectMapper().readValue(jsonResult, new TypeReference<>() {
+        });
         for(InterestTerm _term : interestTerms) {
             Assertions.assertEquals(term.getTerm(), _term.getTerm());
         }

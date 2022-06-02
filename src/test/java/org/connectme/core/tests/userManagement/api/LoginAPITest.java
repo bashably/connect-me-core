@@ -1,15 +1,16 @@
-package org.connectme.core.userManagement.api;
+package org.connectme.core.tests.userManagement.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.connectme.core.authentication.beans.UserAuthenticationBean;
+import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.UserManagement;
+import org.connectme.core.userManagement.api.LoginAPI;
 import org.connectme.core.userManagement.beans.StatefulLoginBean;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -80,7 +80,7 @@ public class LoginAPITest {
         String code = bean.getPhoneNumberVerification().getVerificationCode();
 
         return client.perform(post("/users/login/verify/check").session(session).contentType("text/plain").content(code))
-                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8);
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
     }
 
     private void exceedVerificationAttempts(MockHttpSession session) throws Exception {
