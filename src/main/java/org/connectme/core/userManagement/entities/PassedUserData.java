@@ -102,7 +102,7 @@ public class PassedUserData {
     public static void checkUsernameValue(final String passedUsername) throws UsernameNotAllowedException {
         if(passedUsername.length() > MAX_USERNAME_LENGTH || passedUsername.length() < MIN_USERNAME_LENGTH)
             throw new UsernameNotAllowedException(passedUsername, UsernameNotAllowedException.Reason.LENGTH);
-        else if (!passedUsername.matches("^[a-zA-Z0-9-_]*$"))
+        else if (!passedUsername.matches("^[a-zA-Z\\d-_]*$"))
             //                                  ^^^^^^^^^^^^^^^^ allow only A-Z, a-z, 0-9, -_
             throw new UsernameNotAllowedException(passedUsername, UsernameNotAllowedException.Reason.SYNTAX);
 

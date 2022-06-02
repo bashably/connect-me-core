@@ -14,4 +14,7 @@
 	- In the future each component could be extracted out of the monolith and build as its own service
 - # Disadvantages
 	- Use of interfaces and multiple possible implementations => Complexity
+- # Components
+	- [[User Management Component]] for all interactions with users
+	- [[Interest Management Component]] for managing the core of this application: interests
 	-

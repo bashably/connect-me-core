@@ -66,8 +66,8 @@ public class JpaUserManagement implements UserManagement {
                     HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage()));
             throw new UserDataInsufficientException(e);
         } catch (RuntimeException e) {
-            log.error(String.format("cannot create new user '%s': an unexpected runtime error occurred: %s"),
-                    HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage());
+            log.error(String.format("cannot create new user '%s': an unexpected runtime error occurred: %s",
+                    HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage()));
             throw new InternalErrorException("cannot create new user", e);
         }
         log.debug(String.format("successfully created new user '%s' and persisted it in database",

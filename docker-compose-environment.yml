@@ -17,7 +17,7 @@ services:
     volumes:
       # setup.sql will be loaded and executed at startup
       - ./src/main/resources/setup.sql:/docker-entrypoint-initdb.d/setup.sql
-    command: --init-file /docker-entrypoint-initdb.d/setup.sql
+    command: --init-file /docker-entrypoint-initdb.d/setup.sql --character-set-server=utf8 --collation-server=utf8_unicode_ci
     healthcheck:
       test: [ "CMD", "mysql", "--user=connect-me-core", "--password=KABvy6sW3FkVzqrmTFndxD7Yu", "--execute=SELECT 1" ]
       interval: 1s

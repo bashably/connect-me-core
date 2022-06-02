@@ -20,11 +20,11 @@ import java.util.UUID;
 @Component
 public class LoggingContextExtractor implements HandlerInterceptor {
 
+    @SuppressWarnings("RedundantThrows")
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // read information out of request that is needed for logging
-        HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String sessionID = httpRequest.getSession().getId();
+        String sessionID = request.getSession().getId();
         String requestID = String.valueOf(UUID.randomUUID());
 
         // put values into MDC (log4j reads from the MDC)
@@ -34,11 +34,13 @@ public class LoggingContextExtractor implements HandlerInterceptor {
     }
 
 
+    @SuppressWarnings("RedundantThrows")
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         MDC.clear();
     }
 
+    @SuppressWarnings("RedundantThrows")
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         // clear values from MDC after request has been finished

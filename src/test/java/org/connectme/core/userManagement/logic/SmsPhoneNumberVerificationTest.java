@@ -1,8 +1,7 @@
-package org.connectme.core.tests.userManagement.logic;
+package org.connectme.core.userManagement.logic;
 
 import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
-import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

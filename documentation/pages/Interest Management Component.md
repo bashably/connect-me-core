@@ -1,0 +1,26 @@
+- # Structuring interests
+	- In order to match users by interests, a free-text-input of interests is not possible {{cloze because there are various terms for the same interest and they would not match}} . ^^Interests need to be created and structured^^ so that the application can match similar interests **not just by their nominal name, but by their actual _meaning_**.
+	- ## Overall structure
+		- Interests and hobbies are **difficult to structure**
+		- Interests are not a list {{cloze because there are many terms for the same interest across multiple languages}}, but a **cluster** of interest terms.
+			- Example: _Coding_, _Programming_, _Software Development_, _Hacking_ are all ^^terms for the same activity/hobby^^: creating software and computer science
+		- We want to match users based on their actual interest (-meaning) **and not based on how they call their interests or which language they use**
+			- User `A` is german and likes "Programmieren"
+			- User `B` is chinese and likes "程序", which is the same in another language
+			- They both like the same activity and should be matched
+		- [[draws/2022-05-08-13-22-52.excalidraw]]
+			- **Interest Root** => The the real _meaning_ which all terms address (e.g. creating software and computer science)
+			- **Interest Term** => A word associated with the Interest Root of an interest (e.g. _coding_) in an arbitrary language
+	- ## Database Schema
+		- ![connect-me-data-Page-3.drawio.png](../assets/connect-me-data-Page-3.drawio_1652009962996_0.png)
+	-
+- # Implementation
+	- ## Core Application
+		- A user can search for interest(-terms) and add those terms to his profile
+		- A user can't create an interest(-term), but he can request it
+		- The application matches the interest roots of those terms
+	- ## Management Application
+		- A manager can add terms to an interest root
+		- A manager can create a new interest root
+		- A manager can view interest requests and add them to an existing interest root or create a new one.
+		- That means that for now, interest have to be added and managed manually

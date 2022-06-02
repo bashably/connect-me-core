@@ -27,7 +27,7 @@ import org.springframework.web.util.HtmlUtils;
 @SessionScope
 public class StatefulLoginBean {
 
-    private Logger log = LogManager.getLogger(StatefulLoginBean.class);
+    private final Logger log = LogManager.getLogger(StatefulLoginBean.class);
 
     @Autowired
     private UserManagement userManagement;

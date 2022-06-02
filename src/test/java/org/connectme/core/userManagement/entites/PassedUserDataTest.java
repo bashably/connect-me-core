@@ -1,9 +1,9 @@
-package org.connectme.core.tests.userManagement.entites;
+package org.connectme.core.userManagement.entites;
 
-import org.connectme.core.tests.userManagement.testUtil.TestUserDataRepository;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.exceptions.PasswordTooWeakException;
 import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
+import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package org.connectme.core.tests.userManagement.testUtil;
+package org.connectme.core.userManagement.testUtil;
 
 import org.connectme.core.userManagement.entities.PassedUserData;
 

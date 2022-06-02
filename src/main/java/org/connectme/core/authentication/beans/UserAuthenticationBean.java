@@ -1,4 +1,4 @@
-package org.connectme.core.userManagement.beans;
+package org.connectme.core.authentication.beans;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -51,6 +51,7 @@ public class UserAuthenticationBean {
      */
     private final Map<String, String> loggedInUsersCache = new HashMap<>();
 
+    @SuppressWarnings("SpellCheckingInspection")
     private static final String SECRET = "6a8c00720cbcbd95e3acc3c5a04345ed";
 
     /**
@@ -153,6 +154,20 @@ public class UserAuthenticationBean {
         }
 
         log.info(String.format("user '%s' was successfully logged out", user.getUsername()));
+    }
+
+    /**
+     * Check received JWT token before fetching user data from extracted username claim
+     * @param jwt jwt token containing all information necessary for authentication
+     * @return user data of authenticated user who is owner of the passed and valid JWT
+     * @throws NoSuchUserException username claim in JWT is not valid, user does not exist
+     * @throws InternalErrorException cannot connect to database and fetch user data
+     * @throws FailedAuthenticationException wrong authentication token; JWT expired; JWT invalid
+     * @author Daniel Mehlber
+     */
+    public User authenticateAndFetchUser(final String jwt) throws NoSuchUserException, InternalErrorException, FailedAuthenticationException {
+        String username = authenticate(jwt);
+        return userManagement.fetchUserByUsername(username);
     }
 
     /**
