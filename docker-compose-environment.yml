@@ -1,7 +1,7 @@
 # this file is meant to setup just the environment systems (e.g. database).
 # It is used for testing purposes locally or on GitHub.
 
-version: "3.9"
+version: "3.3"
 services:
   # central core database
   db:
