@@ -1,18 +1,14 @@
 package org.connectme.core.userManagement.entities;
 
-import org.connectme.core.global.exceptions.InternalErrorException;
+import org.connectme.core.interests.entities.InterestTerm;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.geo.Point;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * user data as it is stored in the database
@@ -35,6 +31,12 @@ public class User {
     @Column(name = "current_location")
     private Point currentLocation;
 
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable( name = "user_interest_term",
+                joinColumns = @JoinColumn(name="user_id", referencedColumnName = "username"),
+                inverseJoinColumns = @JoinColumn(name = "interest_term_id", referencedColumnName = "id"))
+    private Set<InterestTerm> interestTerms;
+
     @Column(name = "CREATED_ON")
     @CreationTimestamp
     private LocalDateTime createdOn;
@@ -43,37 +45,7 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedOn;
 
-    /*
-     * THIS DEFAULT CONSTRUCTOR IS MEANT TO BE PRIVATE
-     * A default constructor is required by JPA.
-     */
-    @SuppressWarnings("unused")
-    private User() {}
-
-    /**
-     * Creates new User from {@link PassedUserData} after registration process
-     * has been completed.
-     *
-     * @param userdata user data from registration that will be converted. It will not be checked in this method, you have
-     *                 to call {@link PassedUserData#check()} before.
-     * @throws InternalErrorException password hashing was not successful
-     */
-    public User(final PassedUserData userdata) throws InternalErrorException {
-        this.username = userdata.getUsername();
-        this.phoneNumber = userdata.getPhoneNumber();
-        try {
-            this.passwordHash = hash(userdata.getPassword());
-        } catch (NoSuchAlgorithmException e) {
-            throw new InternalErrorException("cannot create hash of password", e);
-        }
-    }
-
-
-    private static String hash(String password) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] encodedHash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
-        return new String(encodedHash);
-    }
+    public User() {}
 
     public String getUsername() {
         return username;
@@ -107,6 +79,35 @@ public class User {
         return Objects.equals(getUsername(), user.getUsername()) && Objects.equals(getPasswordHash(), user.getPasswordHash());
     }
 
+    public Set<InterestTerm> getInterestTerms() {
+        return interestTerms;
+    }
 
+    public void setInterestTerms(final Set<InterestTerm> terms) {
+        interestTerms = terms;
+    }
 
+    public void addInterestTerm(final InterestTerm term) {
+        interestTerms.add(term);
+    }
+
+    public void removeInterestTerm(final InterestTerm term) {
+        interestTerms.remove(term);
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 }

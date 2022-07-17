@@ -2,6 +2,9 @@ package org.connectme.core.userManagement.beans;
 
 import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.global.exceptions.ForbiddenInteractionException;
+import org.connectme.core.interests.impl.jpa.InterestRepository;
+import org.connectme.core.interests.impl.jpa.InterestTermRepository;
+import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
@@ -13,7 +16,7 @@ import org.connectme.core.userManagement.exceptions.WrongVerificationCodeExcepti
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.LoginState;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
+import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +27,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class StatefulLoginBeanTest {
 
     @Autowired
+    private InterestRepository interestRepository;
+
+    @Autowired
+    private InterestTermRepository interestTermRepository;
+
+    @Autowired
     private UserManagement userManagement;
+
+    @Autowired
+    private UserFactoryBean userFactoryBean;
 
     @Autowired
     private UserRepository userRepository;
@@ -38,13 +50,15 @@ public class StatefulLoginBeanTest {
     @BeforeEach
     public void prepare() {
         userRepository.deleteAll();
+        InterestRepositoryTestUtil.clearRepository(interestRepository);
+        InterestRepositoryTestUtil.fillRepositoryWithTestInterests(interestRepository);
     }
 
     @Test
     public void happyPath() throws Exception {
         // -- arrange --
-        PassedUserData userdata = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userdata);
+        PassedUserData userdata = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userdata);
         userManagement.createNewUser(user);
 
         // -- act --
@@ -67,8 +81,8 @@ public class StatefulLoginBeanTest {
     @Test
     public void attemptWrongPassword() throws Exception {
         // -- arrange --
-        PassedUserData userdata = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userdata);
+        PassedUserData userdata = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userdata);
         userManagement.createNewUser(user);
 
 
@@ -76,9 +90,9 @@ public class StatefulLoginBeanTest {
         // find wrong password that does not match correct password
         String wrongPassword;
         do {
-            wrongPassword = TestUserDataRepository.Passwords.getRandomAllowed();
+            wrongPassword = UserRepositoryTestUtil.Passwords.getRandomAllowed();
         } while (userdata.getPassword().equals(wrongPassword));
-        PassedLoginData wrong = new PassedLoginData(user.getUsername(), new User(new PassedUserData("", wrongPassword, "")).getPasswordHash());
+        PassedLoginData wrong = new PassedLoginData(user.getUsername(), UserFactoryBean.hash(wrongPassword));
 
         // -- act --
         statefulLoginBean.reset();
@@ -93,8 +107,8 @@ public class StatefulLoginBeanTest {
     @Test
     public void attemptExceedVerificationLimit() throws Exception {
         // -- arrange --
-        PassedUserData userdata = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userdata);
+        PassedUserData userdata = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userdata);
         userManagement.createNewUser(user);
 
         PassedLoginData passedLoginData = new PassedLoginData(user.getUsername(), user.getPasswordHash());
@@ -115,8 +129,8 @@ public class StatefulLoginBeanTest {
     @Test
     public void attemptUnknownUsername() throws Exception {
         // -- arrange --
-        PassedUserData userdata = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userdata);
+        PassedUserData userdata = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userdata);
         userManagement.createNewUser(user);
 
         PassedLoginData passedLoginData = new PassedLoginData("xx"+user.getUsername()+"xx", user.getPasswordHash());
@@ -132,8 +146,8 @@ public class StatefulLoginBeanTest {
     @Test
     public void attemptIllegalAccess() throws Exception {
         // -- arrange --
-        PassedUserData userdata = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userdata);
+        PassedUserData userdata = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userdata);
         userManagement.createNewUser(user);
 
         PassedLoginData passedLoginData = new PassedLoginData(user.getUsername(), user.getPasswordHash());
@@ -176,8 +190,8 @@ public class StatefulLoginBeanTest {
     @Test
     public void attemptForbiddenReset() throws Exception {
         // -- arrange --
-        PassedUserData userdata = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userdata);
+        PassedUserData userdata = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userdata);
         userManagement.createNewUser(user);
 
         PassedLoginData passedLoginData = new PassedLoginData(user.getUsername(), user.getPasswordHash());

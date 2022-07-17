@@ -1,8 +1,10 @@
 package org.connectme.core.interests;
 
+import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.exceptions.NoInterestTermsFoundException;
+import org.connectme.core.interests.exceptions.NoSuchInterestTermException;
 
 import java.util.List;
 
@@ -17,7 +19,7 @@ public interface Interests {
      * @param term used for searching interests
      * @return list of found interest terms
      */
-    List<InterestTerm> searchInterestTerms(final String term);
+    List<InterestTerm> searchInterestTerms(final String term) throws InternalErrorException;
 
 
     /**
@@ -28,5 +30,14 @@ public interface Interests {
      * @param language language code
      * @return term for interest in preferred language
      */
-    InterestTerm getInterestTermInLanguage(final Interest interest, final String language) throws NoInterestTermsFoundException;
+    InterestTerm getInterestTermInLanguage(final Interest interest, final String language) throws NoInterestTermsFoundException, InternalErrorException;
+
+    /**
+     * Fetches interest term with id from data storage
+     * @param id id of interest term
+     * @return interest term entity
+     * @throws NoSuchInterestTermException no interest term with passed id found in data storage
+     * @throws InternalErrorException database error; runtime error
+     */
+    InterestTerm fetchInterestTerm(final Long id) throws NoSuchInterestTermException, InternalErrorException;
 }

@@ -1,13 +1,17 @@
 package org.connectme.core.userManagement.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.connectme.core.interests.impl.jpa.InterestRepository;
+import org.connectme.core.interests.impl.jpa.InterestTermRepository;
+import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
+import org.connectme.core.userManagement.beans.UserFactoryBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
+import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,10 +41,22 @@ public class RegistrationAPITest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserFactoryBean userFactoryBean;
+
+    @Autowired
+    private InterestRepository interestRepository;
+
+    @Autowired
+    private InterestTermRepository interestTermRepository;
+
     @BeforeEach
     public void prepare() {
         // 1) remove all users from database that may reside in there
         userRepository.deleteAll();
+        // 2) fill interest repository
+        InterestRepositoryTestUtil.clearRepository(interestRepository);
+        InterestRepositoryTestUtil.fillRepositoryWithTestInterests(interestRepository);
     }
 
     /**
@@ -73,7 +89,7 @@ public class RegistrationAPITest {
         client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
 
         // 2) send user registration data
-        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
+        final PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
         String json = new ObjectMapper().writeValueAsString(userData);
 
         client.perform(post("/users/registration/set/userdata")
@@ -98,8 +114,8 @@ public class RegistrationAPITest {
                 .andExpect(status().isOk());
 
         User createdUser = userManagement.fetchUserByUsername(userData.getUsername());
-        User expectedUser = new User(userData);
-        Assertions.assertEquals(expectedUser, createdUser);
+        User expectedUser = userFactoryBean.build(userData);
+        Assertions.assertEquals(expectedUser.getInterestTerms(), expectedUser.getInterestTerms());
     }
 
     /**
@@ -108,7 +124,7 @@ public class RegistrationAPITest {
      */
     @Test
     public void attemptForbiddenUserData() throws Exception {
-        final PassedUserData invalidUserData = TestUserDataRepository.assembleForbiddenPassedUserData();
+        final PassedUserData invalidUserData = UserRepositoryTestUtil.assembleForbiddenPassedUserData(interestTermRepository);
         final String json = new ObjectMapper().writeValueAsString(invalidUserData);
         MockHttpSession session = new MockHttpSession();
 
@@ -134,7 +150,7 @@ public class RegistrationAPITest {
      */
     @Test
     public void attemptIllegalAccess() throws Exception {
-        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
+        final PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
         final String json = new ObjectMapper().writeValueAsString(userData);
         MockHttpSession session = new MockHttpSession();
 
@@ -244,7 +260,7 @@ public class RegistrationAPITest {
         client.perform(post("/users/registration/init").session(session)).andExpect(status().isOk());
 
         // 2) send user registration data
-        final PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
+        final PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
         String json = new ObjectMapper().writeValueAsString(userData);
 
         client.perform(post("/users/registration/set/userdata")
@@ -313,8 +329,8 @@ public class RegistrationAPITest {
         /*
          * 1) create user in database with username
          */
-        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
-        userManagement.createNewUser(new User(userData));
+        PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        userManagement.createNewUser(userFactoryBean.build(userData));
 
 
         /*
@@ -337,13 +353,13 @@ public class RegistrationAPITest {
         /*
          * 1) create user in database with username
          */
-        PassedUserData userData1 = TestUserDataRepository.assembleValidPassedUserData();
-        userManagement.createNewUser(new User(userData1));
+        PassedUserData userData1 = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        userManagement.createNewUser(userFactoryBean.build(userData1));
 
         // assemble userdata with different username
         PassedUserData userData2;
         do {
-            userData2 = TestUserDataRepository.assembleValidPassedUserData();
+            userData2 = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
         } while (userData2.getUsername().equals(userData1.getUsername()));
         // set phone number of already existing user
         userData2.setPhoneNumber(userData1.getPhoneNumber());

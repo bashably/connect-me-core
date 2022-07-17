@@ -22,3 +22,12 @@ CREATE TABLE interest_term ( -- represent the interest root with in different te
     CONSTRAINT interest_lang_unique UNIQUE (interest_id, lang, term),
     CONSTRAINT FOREIGN KEY (interest_id) REFERENCES interest_root(id) ON DELETE CASCADE
 );
+
+CREATE TABLE user_interest_term ( -- represents the n:m relationship between user and interest_term
+    user_id VARCHAR(20) NOT NULL,
+    interest_term_id BIGINT UNSIGNED NOT NULL,
+    since TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT FOREIGN KEY (user_id) REFERENCES user(username) ON DELETE CASCADE,
+    CONSTRAINT FOREIGN KEY (interest_term_id) REFERENCES interest_term(id) ON DELETE CASCADE,
+    CONSTRAINT UNIQUE (user_id, interest_term_id)
+);

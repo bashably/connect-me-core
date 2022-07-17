@@ -1,11 +1,11 @@
 package org.connectme.core.interests;
 
+import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.impl.jpa.InterestRepository;
 import org.connectme.core.interests.impl.jpa.InterestTermRepository;
-import org.connectme.core.interests.testUtil.TestInterestData;
-import org.connectme.core.userManagement.UserManagement;
+import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,15 +27,11 @@ public class InterestsTests {
     @Autowired
     private InterestTermRepository interestTermRepository;
 
-    @Autowired
-    private UserManagement userManagement;
-
     @BeforeEach
     private void prepare() {
         // fill repository
-        interestRepository.deleteAll();
-        interestTermRepository.deleteAll();
-        TestInterestData.fillRepository(interestRepository);
+        InterestRepositoryTestUtil.clearRepository(interestRepository);
+        InterestRepositoryTestUtil.fillRepositoryWithTestInterests(interestRepository);
     }
 
     /**
@@ -44,9 +40,9 @@ public class InterestsTests {
      * @author Daniel Mehlber
      */
     @Test
-    public void searchInterestTerms() {
+    public void searchInterestTerms() throws InternalErrorException {
         // -- arrange --
-        final InterestTerm interestTerm = TestInterestData.getRandomInterestTerm(interestTermRepository);
+        final InterestTerm interestTerm = InterestRepositoryTestUtil.getRandomInterestTerm(interestTermRepository);
         final String term = interestTerm.getTerm();
 
         // -- act --
@@ -67,7 +63,7 @@ public class InterestsTests {
      */
     @Test
     public void getInterestTermInLanguage_termProvided() throws Exception {
-        InterestTerm randomTerm = TestInterestData.getRandomInterestTerm(interestTermRepository);
+        InterestTerm randomTerm = InterestRepositoryTestUtil.getRandomInterestTerm(interestTermRepository);
         String languageCode = randomTerm.getLanguageCode();
 
         Interest root = randomTerm.getRoot();
@@ -88,7 +84,7 @@ public class InterestsTests {
     @Test
     public void getInterestTermInLanguage_termNotProvided() throws Exception {
         // -- arrange --
-        Interest interest = TestInterestData.getRandomInterest(interestRepository);
+        Interest interest = InterestRepositoryTestUtil.getRandomInterest(interestRepository);
 
         Set<InterestTerm> terms = interest.getTerms();
 

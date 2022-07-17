@@ -8,11 +8,9 @@
 			- User `A` is german and likes "Programmieren"
 			- User `B` is chinese and likes "程序", which is the same in another language
 			- They both like the same activity and should be matched
-		- [[draws/2022-05-08-13-22-52.excalidraw]]
-			- **Interest Root** => The the real _meaning_ which all terms address (e.g. creating software and computer science)
-			- **Interest Term** => A word associated with the Interest Root of an interest (e.g. _coding_) in an arbitrary language
-	- ## Database Schema
-		- ![connect-me-data-Page-3.drawio.png](../assets/connect-me-data-Page-3.drawio_1652009962996_0.png)
+		- **Interest Root** => The the real _meaning_ which all terms address (e.g. creating software and computer science)
+		- **Interest Term** => A word associated with the Interest Root of an interest (e.g. _coding_) in an arbitrary language
+	- ## TODO Database Schema
 	-
 - # Implementation
 	- ## Core Application

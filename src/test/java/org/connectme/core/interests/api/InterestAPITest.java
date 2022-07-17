@@ -8,11 +8,12 @@ import org.connectme.core.interests.entities.Interest;
 import org.connectme.core.interests.entities.InterestTerm;
 import org.connectme.core.interests.impl.jpa.InterestRepository;
 import org.connectme.core.interests.impl.jpa.InterestTermRepository;
-import org.connectme.core.interests.testUtil.TestInterestData;
+import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.UserManagement;
+import org.connectme.core.userManagement.beans.UserFactoryBean;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
+import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,9 @@ public class InterestAPITest {
     @Autowired
     private UserManagement userManagement;
 
+    @Autowired
+    private UserFactoryBean userFactoryBean;
+
     private String currentJWT;
 
     private User currentUser;
@@ -56,13 +60,12 @@ public class InterestAPITest {
     @BeforeEach
     private void prepare() throws Exception {
         // fill repository
-        interestRepository.deleteAll();
-        interestTermRepository.deleteAll();
-        TestInterestData.fillRepository(interestRepository);
+        InterestRepositoryTestUtil.clearRepository(interestRepository);
+        InterestRepositoryTestUtil.fillRepositoryWithTestInterests(interestRepository);
 
         // login user (required to access api)
         userRepository.deleteAll();
-        currentUser = new User(TestUserDataRepository.assembleValidPassedUserData());
+        currentUser = userFactoryBean.build(UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository));
         userManagement.createNewUser(currentUser);
         currentJWT = authenticationBean.login(currentUser);
     }
@@ -76,7 +79,7 @@ public class InterestAPITest {
     @Test
     public void searchTerms() throws Exception {
         // -- arrange --
-        InterestTerm term = TestInterestData.getRandomInterestTerm(interestTermRepository);
+        InterestTerm term = InterestRepositoryTestUtil.getRandomInterestTerm(interestTermRepository);
 
         // -- act --
         String jsonResult = client.perform(get("/interests/search/term").param("term", term.getTerm()).contentType("text/plain").header("authentication", currentJWT))

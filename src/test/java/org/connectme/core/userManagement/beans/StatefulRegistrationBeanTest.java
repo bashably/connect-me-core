@@ -2,12 +2,15 @@ package org.connectme.core.userManagement.beans;
 
 import org.connectme.core.global.exceptions.ForbiddenInteractionException;
 import org.connectme.core.global.exceptions.InternalErrorException;
+import org.connectme.core.interests.impl.jpa.InterestRepository;
+import org.connectme.core.interests.impl.jpa.InterestTermRepository;
+import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.RegistrationState;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
+import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +23,12 @@ import java.time.LocalDateTime;
 public class StatefulRegistrationBeanTest {
 
     @Autowired
+    private InterestTermRepository interestTermRepository;
+
+    @Autowired
+    private InterestRepository interestRepository;
+
+    @Autowired
     private StatefulRegistrationBean statefulRegistrationBean;
 
     @Autowired
@@ -28,6 +37,8 @@ public class StatefulRegistrationBeanTest {
     @BeforeEach
     public void prepare() {
         userRepository.deleteAll();
+        InterestRepositoryTestUtil.clearRepository(interestRepository);
+        InterestRepositoryTestUtil.fillRepositoryWithTestInterests(interestRepository);
     }
 
     @Test
@@ -36,7 +47,7 @@ public class StatefulRegistrationBeanTest {
          * SCENARIO: go through happy path of registration process
          */
 
-        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
+        PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
 
         statefulRegistrationBean.reset();
 
@@ -64,7 +75,7 @@ public class StatefulRegistrationBeanTest {
 
         statefulRegistrationBean.reset();
 
-        statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidPassedUserData());
+        statefulRegistrationBean.setUserData(UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository));
 
         // exceed max amount of allowed verifications attempts
         for (int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
@@ -98,7 +109,7 @@ public class StatefulRegistrationBeanTest {
 
         statefulRegistrationBean.reset();
 
-        statefulRegistrationBean.setUserData(TestUserDataRepository.assembleValidPassedUserData());
+        statefulRegistrationBean.setUserData(UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository));
 
         // exceed max attempt of verifications
         for (int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
@@ -123,7 +134,7 @@ public class StatefulRegistrationBeanTest {
          * Test that other interactions are not allowed
          */
 
-        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
+        PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
 
         // Set state to CREATED, following interactions are not allowed:
         statefulRegistrationBean.reset();

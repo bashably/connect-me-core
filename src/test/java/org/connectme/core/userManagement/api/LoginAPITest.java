@@ -2,14 +2,18 @@ package org.connectme.core.userManagement.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.connectme.core.authentication.beans.UserAuthenticationBean;
+import org.connectme.core.interests.impl.jpa.InterestRepository;
+import org.connectme.core.interests.impl.jpa.InterestTermRepository;
+import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.beans.StatefulLoginBean;
+import org.connectme.core.userManagement.beans.UserFactoryBean;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
 import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
-import org.connectme.core.userManagement.testUtil.TestUserDataRepository;
+import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +40,16 @@ public class LoginAPITest {
     private UserManagement userManagement;
 
     @Autowired
+    private UserFactoryBean userFactoryBean;
+
+    @Autowired
     private UserAuthenticationBean authenticationBean;
+
+    @Autowired
+    private InterestTermRepository interestTermRepository;
+
+    @Autowired
+    private InterestRepository interestRepository;
 
     @Autowired
     private MockMvc client;
@@ -44,6 +57,8 @@ public class LoginAPITest {
     @BeforeEach
     public void prepare() {
         userRepository.deleteAll();
+        InterestRepositoryTestUtil.clearRepository(interestRepository);
+        InterestRepositoryTestUtil.fillRepositoryWithTestInterests(interestRepository);
     }
 
     /**
@@ -106,8 +121,8 @@ public class LoginAPITest {
     @Test
     public void happyPath() throws Exception {
         // -- arrange --
-        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userData);
+        PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userData);
         userManagement.createNewUser(user);
         PassedLoginData loginData = new PassedLoginData(user.getUsername(), user.getPasswordHash());
         MockHttpSession session = new MockHttpSession();
@@ -123,8 +138,8 @@ public class LoginAPITest {
     @Test
     public void attemptExceedVerificationAttempts() throws Exception {
         // -- arrange --
-        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userData);
+        PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userData);
         userManagement.createNewUser(user);
         PassedLoginData loginData = new PassedLoginData(user.getUsername(), user.getPasswordHash());
         MockHttpSession session = new MockHttpSession();
@@ -148,8 +163,8 @@ public class LoginAPITest {
     @Test
     public void attemptIllegalAccess() throws Exception {
         // -- arrange --
-        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userData);
+        PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userData);
         userManagement.createNewUser(user);
         PassedLoginData loginData = new PassedLoginData(user.getUsername(), user.getPasswordHash());
         String loginDataJson = new ObjectMapper().writeValueAsString(loginData);
@@ -189,8 +204,8 @@ public class LoginAPITest {
     @Test
     public void attemptWrongPassword() throws Exception {
         // -- arrange --
-        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userData);
+        PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userData);
         userManagement.createNewUser(user);
         PassedLoginData loginData = new PassedLoginData(user.getUsername(), "incorrect-password-hash");
         String loginDataJson = new ObjectMapper().writeValueAsString(loginData);
@@ -204,8 +219,8 @@ public class LoginAPITest {
     @Test
     public void attemptUnknownUsername() throws Exception {
         // -- arrange --
-        PassedUserData userData = TestUserDataRepository.assembleValidPassedUserData();
-        User user = new User(userData);
+        PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
+        User user = userFactoryBean.build(userData);
         userManagement.createNewUser(user);
         PassedLoginData loginData = new PassedLoginData("unknownUser", user.getPasswordHash());
         String loginDataJson = new ObjectMapper().writeValueAsString(loginData);

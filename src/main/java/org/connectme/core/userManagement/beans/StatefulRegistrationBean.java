@@ -105,9 +105,9 @@ public class StatefulRegistrationBean {
                     throw new PhoneNumberAlreadyInUseException(passedUserData.getPhoneNumber());
                 }
 
-            } catch (final PasswordTooWeakException | UsernameNotAllowedException | PhoneNumberInvalidException reason) {
+            } catch (final UserDataInsufficientException reason) {
                 log.warn("provided user data was not sufficient: " + reason.getMessage());
-                throw new UserDataInsufficientException(reason);
+                throw reason;
             } catch (final InternalErrorException e) {
                 log.error("cannot set user data because of an unexpected internal error: " + e.getMessage());
                 throw e;

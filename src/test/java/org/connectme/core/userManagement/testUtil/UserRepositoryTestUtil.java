@@ -1,5 +1,8 @@
 package org.connectme.core.userManagement.testUtil;
 
+import org.connectme.core.interests.impl.jpa.InterestRepository;
+import org.connectme.core.interests.impl.jpa.InterestTermRepository;
+import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.entities.PassedUserData;
 
 import java.util.Random;
@@ -8,7 +11,9 @@ import java.util.Random;
  * This util class contains a repository of usernames and password (both allowed and forbidden) that can be used
  * by various test scenarios.
  */
-public class TestUserDataRepository {
+
+public class UserRepositoryTestUtil {
+
 
     /**
      * Repository of usernames (both allowed and forbidden) for various testing scenarios
@@ -121,18 +126,29 @@ public class TestUserDataRepository {
         }
     }
 
-    public static PassedUserData assembleValidPassedUserData() {
+    /**
+     * Assembles instance of {@link PassedUserData} containing valid user data.
+     * <h2>Important</h2>
+     * This method requires a filled interest term repository due to the required Set of interest term ids. It can be filled using
+     * {@link InterestRepositoryTestUtil#fillRepositoryWithTestInterests(InterestRepository)}.
+     * @param interestTermRepository interest term repository used for generating a set of interest term ids passed as user data.
+     * @return valid user data of instance {@link PassedUserData}
+     * @author Daniel Mehlber
+     */
+    public static PassedUserData assembleValidPassedUserData(InterestTermRepository interestTermRepository) {
         return new PassedUserData(
-                TestUserDataRepository.Usernames.getRandomAllowed(),
-                TestUserDataRepository.Passwords.getRandomAllowed(),
-                TestUserDataRepository.PhoneNumbers.getRandomAllowed());
+                UserRepositoryTestUtil.Usernames.getRandomAllowed(),
+                UserRepositoryTestUtil.Passwords.getRandomAllowed(),
+                UserRepositoryTestUtil.PhoneNumbers.getRandomAllowed(),
+                InterestRepositoryTestUtil.getRandomInterestTermIds(interestTermRepository, 5));
     }
 
-    public static PassedUserData assembleForbiddenPassedUserData() {
+    public static PassedUserData assembleForbiddenPassedUserData(InterestTermRepository interestTermRepository) {
         return new PassedUserData(
-                TestUserDataRepository.Usernames.getRandomForbidden(),
-                TestUserDataRepository.Passwords.getRandomForbidden(),
-                TestUserDataRepository.PhoneNumbers.getRandomForbidden());
+                UserRepositoryTestUtil.Usernames.getRandomForbidden(),
+                UserRepositoryTestUtil.Passwords.getRandomForbidden(),
+                UserRepositoryTestUtil.PhoneNumbers.getRandomForbidden(),
+                InterestRepositoryTestUtil.getRandomInterestTermIds(interestTermRepository, 5));
     }
 
 }

@@ -6,6 +6,7 @@ import org.connectme.core.global.exceptions.ForbiddenInteractionException;
 import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
+import org.connectme.core.userManagement.beans.UserFactoryBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.*;
@@ -19,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class RegistrationAPI {
 
     @Autowired
-    UserManagement userManagement;
+    private UserManagement userManagement;
+
+    @Autowired
+    private UserFactoryBean userFactory;
 
     public static final String SESSION_REGISTRATION = "session-registration";
 
@@ -149,7 +153,7 @@ public class RegistrationAPI {
             /*
              * create user from registration data and persist him in DB
              */
-            final User newUser = new User(registration.getPassedUserData());
+            final User newUser = userFactory.build(registration.getPassedUserData());
             userManagement.createNewUser(newUser);
 
             log.info(String.format("registration of new user '%s' was successful", newUser.getUsername()));

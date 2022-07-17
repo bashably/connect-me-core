@@ -32,6 +32,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         registration.setFilter(userAuthenticationFilter);
         // add url patterns for authentication
         registration.addUrlPatterns("/interests/*");
+        registration.addUrlPatterns("/users/data/*");
         registration.setOrder(2);
         return registration;
     }

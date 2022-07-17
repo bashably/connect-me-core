@@ -3,11 +3,10 @@ package org.connectme.core.userManagement.entities;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.connectme.core.userManagement.exceptions.PasswordTooWeakException;
-import org.connectme.core.userManagement.exceptions.PhoneNumberInvalidException;
-import org.connectme.core.userManagement.exceptions.UsernameNotAllowedException;
+import org.connectme.core.userManagement.exceptions.*;
 
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Contains all user data passed by the user himself during the registration process.
@@ -22,6 +21,13 @@ public class PassedUserData {
     private String username;
     public static final int MIN_USERNAME_LENGTH = 4;
     public static final int MAX_USERNAME_LENGTH = 20;
+
+    /**
+     * list of interest term ids the user has selected for his profile
+     */
+    private Set<Long> interestTermIds;
+
+    public static final int MIN_INTERESTS = 3;
 
     /** password in clear text format */
     private String password;
@@ -49,10 +55,12 @@ public class PassedUserData {
     @JsonCreator
     public PassedUserData(@JsonProperty(value = "username", required = true) final String username,
                           @JsonProperty(value = "password", required = true) final String password,
-                          @JsonProperty(value = "phoneNumber", required = true) final String phoneNumber) {
+                          @JsonProperty(value = "phoneNumber", required = true) final String phoneNumber,
+                          @JsonProperty(value = "interestTermIds", required = true) final Set<Long> interestTermIds) {
         setUsername(username);
         setPassword(password);
         setPhoneNumber(phoneNumber);
+        setInterestTermIds(interestTermIds);
     }
 
     public String getUsername() {
@@ -79,16 +87,30 @@ public class PassedUserData {
         this.phoneNumber = phoneNumber.trim().replace(" ", "");
     }
 
+    public Set<Long> getInterestTermIds() {
+        return interestTermIds;
+    }
+
+    public void setInterestTermIds(Set<Long> interestTermIds) {
+        this.interestTermIds = interestTermIds;
+    }
+
     /**
      * Check if passed user data is valid and can be accepted by the system.
      *
      * @throws PasswordTooWeakException the provided password is not strong enough
      * @throws UsernameNotAllowedException the username is forbidden for various reasons
      */
-    public void check() throws PasswordTooWeakException, UsernameNotAllowedException, PhoneNumberInvalidException {
-        checkUsernameValue(this.username);
-        checkPasswordValue(this.password, this.username);
-        checkPhoneNumber(this.phoneNumber);
+    public void check() throws UserDataInsufficientException {
+        try {
+            checkUsernameValue(this.username);
+            checkPasswordValue(this.password, this.username);
+            checkPhoneNumber(this.phoneNumber);
+            checkInterestTermIds(this.interestTermIds);
+        } catch (NotEnoughInterestTermsProvidedException | PhoneNumberInvalidException | PasswordTooWeakException |
+                 UsernameNotAllowedException e) {
+            throw new UserDataInsufficientException(e);
+        }
     }
 
     /**
@@ -156,6 +178,22 @@ public class PassedUserData {
 
         if(!phoneNumber.matches("^\\d+$"))
             throw new PhoneNumberInvalidException(phoneNumber, "phone number does not only contain digits");
+    }
+
+    /**
+     * checks the passed interest term ids (amount and validity)
+     * @param interestTermIds ids of interest terms that will be added to user profile. At least {@value MIN_INTERESTS} must
+     *                        be provided for a valid user profile.
+     * @throws NotEnoughInterestTermsProvidedException not enough interest terms were provided.
+     * @author Daniel Mehlber
+     */
+    private static void checkInterestTermIds(final Set<Long> interestTermIds) throws NotEnoughInterestTermsProvidedException {
+
+        // check if enough interest terms ids were provided.
+        if(interestTermIds.size() < MIN_INTERESTS) {
+            throw new NotEnoughInterestTermsProvidedException(interestTermIds.size(), MIN_INTERESTS);
+        }
+
     }
 
     @Override

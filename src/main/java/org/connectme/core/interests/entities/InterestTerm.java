@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name="interest_term")
@@ -56,4 +57,16 @@ public class InterestTerm {
         this.root = _root;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InterestTerm that = (InterestTerm) o;
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getLanguageCode(), that.getLanguageCode()) && Objects.equals(getTerm(), that.getTerm());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getLanguageCode(), getTerm());
+    }
 }
