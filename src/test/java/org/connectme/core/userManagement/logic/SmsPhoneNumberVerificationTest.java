@@ -12,7 +12,7 @@ public class SmsPhoneNumberVerificationTest {
     @Test
     public void happyPath() throws VerificationAttemptNotAllowedException, WrongVerificationCodeException {
         // -- arrange --
-        SmsPhoneNumberVerification verification = new SmsPhoneNumberVerification();
+        SmsPhoneNumberVerificationProcess verification = new SmsPhoneNumberVerificationProcess();
 
         // -- act --
         verification.startVerificationAttempt();
@@ -25,10 +25,10 @@ public class SmsPhoneNumberVerificationTest {
     @Test
     public void exceedVerificationAttemptLimit() throws Exception {
         // -- arrange --
-        SmsPhoneNumberVerification verification = new SmsPhoneNumberVerification();
+        SmsPhoneNumberVerificationProcess verification = new SmsPhoneNumberVerificationProcess();
 
         // exceed verification limit
-        for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+        for(int i = 0; i < SmsPhoneNumberVerificationProcess.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             verification.startVerificationAttempt();
             try {
                 verification.checkVerificationCode("");
@@ -40,7 +40,7 @@ public class SmsPhoneNumberVerificationTest {
         Assertions.assertThrows(VerificationAttemptNotAllowedException.class, verification::startVerificationAttempt);
         Assertions.assertFalse(verification.isVerified());
         // skip waiting time
-        verification.setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerification.BLOCK_FAILED_ATTEMPT_MINUTES));
+        verification.setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerificationProcess.BLOCK_FAILED_ATTEMPT_MINUTES));
         // try again
         verification.startVerificationAttempt();
         verification.checkVerificationCode(verification.getVerificationCode());
@@ -56,7 +56,7 @@ public class SmsPhoneNumberVerificationTest {
     @Test
     public void attemptVerificationAttemptWhilePendingVerification() throws VerificationAttemptNotAllowedException {
         // -- arrange --
-        SmsPhoneNumberVerification verification = new SmsPhoneNumberVerification();
+        SmsPhoneNumberVerificationProcess verification = new SmsPhoneNumberVerificationProcess();
         verification.startVerificationAttempt();
 
         // -- act and assert --
@@ -66,7 +66,7 @@ public class SmsPhoneNumberVerificationTest {
         Assertions.assertThrows(VerificationAttemptNotAllowedException.class, verification::startVerificationAttempt);
 
         // skip verification attempt duration and assert that another attempt is free now
-        verification.setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerification.VERIFICATION_ATTEMPT_PENDING_DURATION_MINUTES));
+        verification.setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerificationProcess.VERIFICATION_ATTEMPT_PENDING_DURATION_MINUTES));
         Assertions.assertFalse(verification.isPendingVerificationAttempt());
         Assertions.assertTrue(verification.isVerificationAttemptCurrentlyAllowed());
         Assertions.assertDoesNotThrow(verification::startVerificationAttempt);

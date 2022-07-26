@@ -6,7 +6,7 @@ import org.connectme.core.authentication.beans.UserAuthenticationBean;
 import org.connectme.core.global.exceptions.ForbiddenInteractionException;
 import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.beans.StatefulLoginBean;
+import org.connectme.core.userManagement.beans.login.StatefulLoginSessionBean;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.NoSuchUserException;
@@ -26,7 +26,7 @@ public class LoginAPI {
     private final Logger log = LogManager.getLogger(LoginAPI.class);
 
     @Autowired
-    private StatefulLoginBean statefulLoginBean;
+    private StatefulLoginSessionBean statefulLoginSessionBean;
 
     @Autowired
     private UserManagement userManagement;
@@ -45,7 +45,7 @@ public class LoginAPI {
     public void init() throws ForbiddenInteractionException {
         log.debug("reset of login process requested...");
         try {
-            statefulLoginBean.reset();
+            statefulLoginSessionBean.reset();
         } catch (ForbiddenInteractionException e) {
             log.warn("cannot re-initialize login process: " + e.getMessage());
             throw e;
@@ -68,7 +68,7 @@ public class LoginAPI {
     public void receiveUserData(@RequestBody final PassedLoginData passedLoginData) throws NoSuchUserException, InternalErrorException, ForbiddenInteractionException, WrongPasswordException {
         log.debug("received login data from user");
         try {
-            statefulLoginBean.passLoginData(passedLoginData);
+            statefulLoginSessionBean.passLoginData(passedLoginData);
         } catch (NoSuchUserException e) {
             log.warn("cannot accept login data due to unknown username" + e.getMessage());
             throw e;
@@ -98,7 +98,7 @@ public class LoginAPI {
     public void startPhoneNumberVerification() throws ForbiddenInteractionException, VerificationAttemptNotAllowedException {
         log.debug("login phone number verification requested...");
         try {
-            statefulLoginBean.startAndWaitForVerification();
+            statefulLoginSessionBean.startAndWaitForVerification();
         } catch (ForbiddenInteractionException e) {
             log.warn("cannot start login phone number verification due to wrong state: " + e.getMessage());
             throw e;
@@ -116,7 +116,7 @@ public class LoginAPI {
 
         // check verification code
         try {
-            statefulLoginBean.checkVerificationCode(passedVerificationCode);
+            statefulLoginSessionBean.checkVerificationCode(passedVerificationCode);
         } catch (ForbiddenInteractionException e) {
             log.warn("cannot check phone number verification code due to wrong login state: " + e.getMessage());
             throw e;
@@ -130,7 +130,7 @@ public class LoginAPI {
         // phone number verification was successful: log in user
         String jwtToken;
         try {
-            User user = userManagement.fetchUserByUsername(statefulLoginBean.getLoginData().getUsername());
+            User user = userManagement.fetchUserByUsername(statefulLoginSessionBean.getLoginData().getUsername());
             jwtToken = authenticationUserBean.login(user);
         } catch (InternalErrorException | NoSuchUserException e) {
             log.fatal("cannot login verified user due to an fatal internal error: " + e.getMessage());

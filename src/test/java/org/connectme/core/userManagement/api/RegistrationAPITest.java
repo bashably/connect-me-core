@@ -5,12 +5,12 @@ import org.connectme.core.interests.impl.jpa.InterestRepository;
 import org.connectme.core.interests.impl.jpa.InterestTermRepository;
 import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
+import org.connectme.core.userManagement.beans.registration.StatefulRegistrationSessionBean;
 import org.connectme.core.userManagement.beans.UserFactoryBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
-import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerificationProcess;
 import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,15 +60,15 @@ public class RegistrationAPITest {
     }
 
     /**
-     * The {@link StatefulRegistrationBean} is stored in session under a specific attribute
+     * The {@link StatefulRegistrationSessionBean} is stored in session under a specific attribute
      * name called "scopedTarget.{defined name}". The name of the session attribute is defined
      * in {@link RegistrationAPI}. Extract the object from the session.
      *
      * @param session session in which the bean is placed
-     * @return instance of the {@link StatefulRegistrationBean}
+     * @return instance of the {@link StatefulRegistrationSessionBean}
      */
-    private StatefulRegistrationBean extractRegistrationBeanFromSession(MockHttpSession session) {
-      return (StatefulRegistrationBean) session.getAttribute("scopedTarget."+RegistrationAPI.SESSION_REGISTRATION);
+    private StatefulRegistrationSessionBean extractRegistrationBeanFromSession(MockHttpSession session) {
+      return (StatefulRegistrationSessionBean) session.getAttribute("scopedTarget."+RegistrationAPI.SESSION_REGISTRATION);
     }
 
     /**
@@ -104,7 +104,7 @@ public class RegistrationAPITest {
                 .andExpect(status().isOk());
 
         // 4) pass verification code
-        StatefulRegistrationBean registrationObject = extractRegistrationBeanFromSession(session);
+        StatefulRegistrationSessionBean registrationObject = extractRegistrationBeanFromSession(session);
         String code = registrationObject.getPhoneNumberVerification().getVerificationCode();
 
         client.perform(post("/users/registration/verify")
@@ -226,7 +226,7 @@ public class RegistrationAPITest {
          * 5) complete verification. No further actions allowed
          */
         // action
-        StatefulRegistrationBean registration = extractRegistrationBeanFromSession(session);
+        StatefulRegistrationSessionBean registration = extractRegistrationBeanFromSession(session);
         final String verificationCode = registration.getPhoneNumberVerification().getVerificationCode();
         client.perform(post("/users/registration/verify")
                         .content(verificationCode)
@@ -271,7 +271,7 @@ public class RegistrationAPITest {
 
 
         // 3) exceed the maximum amount of verification attempts
-        for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+        for(int i = 0; i < SmsPhoneNumberVerificationProcess.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             // 3.1) start verification process
             client.perform(post("/users/registration/start/verify")
                             .session(session))

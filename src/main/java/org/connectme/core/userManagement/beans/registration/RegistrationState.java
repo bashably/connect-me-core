@@ -1,4 +1,4 @@
-package org.connectme.core.userManagement.logic;
+package org.connectme.core.userManagement.beans.registration;
 
 /**
  * This enum contains all states the Registration object goes through

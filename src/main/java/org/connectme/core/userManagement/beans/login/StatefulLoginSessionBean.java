@@ -1,4 +1,4 @@
-package org.connectme.core.userManagement.beans;
+package org.connectme.core.userManagement.beans.login;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,8 +12,7 @@ import org.connectme.core.userManagement.exceptions.NoSuchUserException;
 import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowedException;
 import org.connectme.core.userManagement.exceptions.WrongPasswordException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
-import org.connectme.core.userManagement.logic.LoginState;
-import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerificationProcess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -22,12 +21,24 @@ import org.springframework.web.util.HtmlUtils;
 /**
  * This stateful bean is stored in session and holds all information and progress of
  * the users' login.
+ *
+ * It represents the login process and ensures that all necessary steps are completed in order
+ * to perform the login successfully.
+ *
+ * This bean contains and manages
+ * <ul>
+ *      <li>process with steps that must be completed in the correct order</li>
+ *      <li>security and user data validation</li>
+ *      <li>data passed by the user</li>
+ * </ul>
+ *
+ * @author Daniel Mehlber
  */
 @Component(LoginAPI.SESSION_LOGIN)
 @SessionScope
-public class StatefulLoginBean {
+public class StatefulLoginSessionBean {
 
-    private final Logger log = LogManager.getLogger(StatefulLoginBean.class);
+    private final Logger log = LogManager.getLogger(StatefulLoginSessionBean.class);
 
 
     @Autowired
@@ -41,14 +52,14 @@ public class StatefulLoginBean {
     /**
      * this instance manages the phone number verification via SMS
      */
-    private SmsPhoneNumberVerification phoneNumberVerification;
+    private SmsPhoneNumberVerificationProcess phoneNumberVerification;
 
     /**
      * Login data passed by the user
      */
     private PassedLoginData loginData;
 
-    public StatefulLoginBean() {
+    public StatefulLoginSessionBean() {
         try {
             reset();
         } catch (ForbiddenInteractionException ignored) {}
@@ -58,7 +69,7 @@ public class StatefulLoginBean {
      * Reset and re-initialize this stateful bean if allowed. This interaction is not allowed if the verification
      * is currently blocked because otherwise the user could bypass the verification block.
      * @throws ForbiddenInteractionException resetting the bean is currently not allowed
-     * @see StatefulLoginBean#isResetAllowed()
+     * @see StatefulLoginSessionBean#isResetAllowed()
      * @author Daniel Mehlber
      */
     public void reset() throws ForbiddenInteractionException {
@@ -68,7 +79,7 @@ public class StatefulLoginBean {
             throw new ForbiddenInteractionException("reset is currently not allowed");
         } else {
             state = LoginState.INIT;
-            phoneNumberVerification = new SmsPhoneNumberVerification();
+            phoneNumberVerification = new SmsPhoneNumberVerificationProcess();
         }
     }
 
@@ -76,7 +87,7 @@ public class StatefulLoginBean {
      * Checks if the reset interaction is allowed at the present moment. A reset is not allowed if the verification
      * is currently blocked (otherwise the user could bypass the verification block).
      * @return true if verification is currently allowed
-     * @see SmsPhoneNumberVerification#isVerificationAttemptCurrentlyAllowed()
+     * @see SmsPhoneNumberVerificationProcess#isVerificationAttemptCurrentlyAllowed()
      * @author Daniel Mehlber
      */
     private boolean isResetAllowed() {
@@ -175,7 +186,7 @@ public class StatefulLoginBean {
         return state;
     }
 
-    public SmsPhoneNumberVerification getPhoneNumberVerification() {
+    public SmsPhoneNumberVerificationProcess getPhoneNumberVerification() {
         return phoneNumberVerification;
     }
 

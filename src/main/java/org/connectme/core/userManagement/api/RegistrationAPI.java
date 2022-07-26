@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.connectme.core.global.exceptions.ForbiddenInteractionException;
 import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.beans.StatefulRegistrationBean;
+import org.connectme.core.userManagement.beans.registration.StatefulRegistrationSessionBean;
 import org.connectme.core.userManagement.beans.UserFactoryBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
@@ -30,7 +30,7 @@ public class RegistrationAPI {
     private final Logger log = LogManager.getLogger(RegistrationAPI.class);
 
     @Autowired
-    private StatefulRegistrationBean registration;
+    private StatefulRegistrationSessionBean registration;
 
     /**
      * The client calls this method in order to init or reset a registration.

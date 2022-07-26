@@ -1,4 +1,4 @@
-package org.connectme.core.userManagement.logic;
+package org.connectme.core.userManagement.beans.login;
 
 /**
  * States of the login process

@@ -5,11 +5,12 @@ import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.interests.impl.jpa.InterestRepository;
 import org.connectme.core.interests.impl.jpa.InterestTermRepository;
 import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
+import org.connectme.core.userManagement.beans.registration.StatefulRegistrationSessionBean;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
-import org.connectme.core.userManagement.logic.RegistrationState;
-import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.connectme.core.userManagement.beans.registration.RegistrationState;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerificationProcess;
 import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDateTime;
 
 @SpringBootTest
-public class StatefulRegistrationBeanTest {
+public class StatefulRegistrationSessionBeanTest {
 
     @Autowired
     private InterestTermRepository interestTermRepository;
@@ -29,7 +30,7 @@ public class StatefulRegistrationBeanTest {
     private InterestRepository interestRepository;
 
     @Autowired
-    private StatefulRegistrationBean statefulRegistrationBean;
+    private StatefulRegistrationSessionBean statefulRegistrationSessionBean;
 
     @Autowired
     private UserRepository userRepository;
@@ -49,19 +50,19 @@ public class StatefulRegistrationBeanTest {
 
         PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
 
-        statefulRegistrationBean.reset();
+        statefulRegistrationSessionBean.reset();
 
-        statefulRegistrationBean.setUserData(userData);
-        Assertions.assertEquals(statefulRegistrationBean.getPassedUserData(), userData);
+        statefulRegistrationSessionBean.setUserData(userData);
+        Assertions.assertEquals(statefulRegistrationSessionBean.getPassedUserData(), userData);
 
 
-        statefulRegistrationBean.startAndWaitForVerification();
+        statefulRegistrationSessionBean.startAndWaitForVerification();
 
-        String code = statefulRegistrationBean.getPhoneNumberVerification().getVerificationCode();
-        statefulRegistrationBean.checkVerificationCode(code);
+        String code = statefulRegistrationSessionBean.getPhoneNumberVerification().getVerificationCode();
+        statefulRegistrationSessionBean.checkVerificationCode(code);
 
-        Assertions.assertTrue(statefulRegistrationBean.getPhoneNumberVerification().isVerified());
-        Assertions.assertSame(statefulRegistrationBean.getState(), RegistrationState.USER_VERIFIED);
+        Assertions.assertTrue(statefulRegistrationSessionBean.getPhoneNumberVerification().isVerified());
+        Assertions.assertSame(statefulRegistrationSessionBean.getState(), RegistrationState.USER_VERIFIED);
     }
 
     @Test
@@ -73,28 +74,28 @@ public class StatefulRegistrationBeanTest {
          * Test this security mechanism
          */
 
-        statefulRegistrationBean.reset();
+        statefulRegistrationSessionBean.reset();
 
-        statefulRegistrationBean.setUserData(UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository));
+        statefulRegistrationSessionBean.setUserData(UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository));
 
         // exceed max amount of allowed verifications attempts
-        for (int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
-            statefulRegistrationBean.startAndWaitForVerification();
+        for (int i = 0; i < SmsPhoneNumberVerificationProcess.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+            statefulRegistrationSessionBean.startAndWaitForVerification();
             try {
-                statefulRegistrationBean.checkVerificationCode("");
+                statefulRegistrationSessionBean.checkVerificationCode("");
             } catch (final WrongVerificationCodeException ignored) {}
         }
 
         // attempt another verification right away and expect exception
-        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, statefulRegistrationBean::startAndWaitForVerification);
+        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, statefulRegistrationSessionBean::startAndWaitForVerification);
 
         // reduce time to wait in order to complete unit test faster
-        statefulRegistrationBean.getPhoneNumberVerification().setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerification.BLOCK_FAILED_ATTEMPT_MINUTES));
+        statefulRegistrationSessionBean.getPhoneNumberVerification().setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerificationProcess.BLOCK_FAILED_ATTEMPT_MINUTES));
 
         // try again (this time with the correct code)
-        statefulRegistrationBean.startAndWaitForVerification();
-        String code = statefulRegistrationBean.getPhoneNumberVerification().getVerificationCode();
-        statefulRegistrationBean.checkVerificationCode(code);
+        statefulRegistrationSessionBean.startAndWaitForVerification();
+        String code = statefulRegistrationSessionBean.getPhoneNumberVerification().getVerificationCode();
+        statefulRegistrationSessionBean.checkVerificationCode(code);
     }
 
     @Test
@@ -107,23 +108,23 @@ public class StatefulRegistrationBeanTest {
          * Test this security mechanism
          */
 
-        statefulRegistrationBean.reset();
+        statefulRegistrationSessionBean.reset();
 
-        statefulRegistrationBean.setUserData(UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository));
+        statefulRegistrationSessionBean.setUserData(UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository));
 
         // exceed max attempt of verifications
-        for (int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
-            statefulRegistrationBean.startAndWaitForVerification();
+        for (int i = 0; i < SmsPhoneNumberVerificationProcess.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+            statefulRegistrationSessionBean.startAndWaitForVerification();
             try {
-                statefulRegistrationBean.checkVerificationCode("");
+                statefulRegistrationSessionBean.checkVerificationCode("");
             } catch (final WrongVerificationCodeException ignored) {}
         }
 
         // attempt another verification right away and expect exception
-        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, statefulRegistrationBean::startAndWaitForVerification);
+        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, statefulRegistrationSessionBean::startAndWaitForVerification);
 
         // try to reset registration in order to illegally bypass blocked time. Must be interrupted by exception.
-        Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationBean::reset);
+        Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationSessionBean::reset);
     }
 
     @Test
@@ -137,24 +138,24 @@ public class StatefulRegistrationBeanTest {
         PassedUserData userData = UserRepositoryTestUtil.assembleValidPassedUserData(interestTermRepository);
 
         // Set state to CREATED, following interactions are not allowed:
-        statefulRegistrationBean.reset();
-        Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationBean::startAndWaitForVerification);
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationBean.checkVerificationCode(""));
+        statefulRegistrationSessionBean.reset();
+        Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationSessionBean::startAndWaitForVerification);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationSessionBean.checkVerificationCode(""));
 
         // Set state to USERNAME_PASSWORD_SET, following interactions are not allowed:
-        statefulRegistrationBean.setUserData(userData);
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationBean.setUserData(userData));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationBean.checkVerificationCode(""));
+        statefulRegistrationSessionBean.setUserData(userData);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationSessionBean.setUserData(userData));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationSessionBean.checkVerificationCode(""));
 
         // Set state to WAITING_FOR_PHONE_NUMBER_VERIFICATION, following interactions are not allowed:
-        statefulRegistrationBean.startAndWaitForVerification();
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationBean.setUserData(userData));
-        Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationBean::startAndWaitForVerification);
+        statefulRegistrationSessionBean.startAndWaitForVerification();
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationSessionBean.setUserData(userData));
+        Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationSessionBean::startAndWaitForVerification);
 
         // Set state to PHONE_NUMBER_VERIFIED, following interactions are not allowed:
-        statefulRegistrationBean.checkVerificationCode(statefulRegistrationBean.getPhoneNumberVerification().getVerificationCode());
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationBean.setUserData(userData));
-        Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationBean::startAndWaitForVerification);
+        statefulRegistrationSessionBean.checkVerificationCode(statefulRegistrationSessionBean.getPhoneNumberVerification().getVerificationCode());
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulRegistrationSessionBean.setUserData(userData));
+        Assertions.assertThrows(ForbiddenInteractionException.class, statefulRegistrationSessionBean::startAndWaitForVerification);
     }
 
 }

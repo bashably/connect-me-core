@@ -1,4 +1,4 @@
-package org.connectme.core.userManagement.beans;
+package org.connectme.core.userManagement.beans.registration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -7,32 +7,32 @@ import org.connectme.core.global.exceptions.InternalErrorException;
 import org.connectme.core.userManagement.UserManagement;
 import org.connectme.core.userManagement.api.RegistrationAPI;
 import org.connectme.core.userManagement.entities.PassedUserData;
-import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.exceptions.*;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
-import org.connectme.core.userManagement.logic.RegistrationState;
-import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerificationProcess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 import org.springframework.web.util.HtmlUtils;
 
 /**
- * Because of various verification steps along the registration process this application keeps the
- * registration data and state in the user's session.
+ * This stateful session bean represents the user registration process and ensures that all necessary steps are
+ * completed in order to successfully register a new user to the system.
  *
- * STORED IN SESSION (temporary object)
- *
- * An instance of this class will be converted to a {@link User} object after the registration process
- * is completed and persisted in the database.
+ * This bean contains and manages
+ * <ul>
+ *     <li>process with steps that must be completed in the correct order</li>
+ *     <li>security and user data validation</li>
+ *     <li>data passed by the user</li>
+ * </ul>
  *
  * @author Daniel Mehlber
  */
 @Component(RegistrationAPI.SESSION_REGISTRATION)
 @SessionScope
-public class StatefulRegistrationBean {
+public class StatefulRegistrationSessionBean {
 
-    private final Logger log = LogManager.getLogger(StatefulRegistrationBean.class);
+    private final Logger log = LogManager.getLogger(StatefulRegistrationSessionBean.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -45,7 +45,7 @@ public class StatefulRegistrationBean {
     /**
      * Holds all data and progress associated with the two-factor phone number verification.
      */
-    private SmsPhoneNumberVerification phoneNumberVerification;
+    private SmsPhoneNumberVerificationProcess phoneNumberVerification;
 
     /**
      * The registration process has multiple steps along which the client updates the instances state
@@ -57,7 +57,7 @@ public class StatefulRegistrationBean {
      * Creates new Registration and sets state accordingly
      * @author Daniel Mehlber
      */
-    public StatefulRegistrationBean() {
+    public StatefulRegistrationSessionBean() {
         try {
             reset();
         } catch (ForbiddenInteractionException ignored) {}
@@ -219,11 +219,11 @@ public class StatefulRegistrationBean {
      *
      * @throws ForbiddenInteractionException cannot reset registration object right now.
      * @author Daniel Mehlber
-     * @see StatefulRegistrationBean#isResetAllowed()
+     * @see StatefulRegistrationSessionBean#isResetAllowed()
      */
     public void reset() throws ForbiddenInteractionException {
         if(isResetAllowed()) {
-            phoneNumberVerification = new SmsPhoneNumberVerification();
+            phoneNumberVerification = new SmsPhoneNumberVerificationProcess();
             state = RegistrationState.CREATED;
             passedUserData = null;
         } else {
@@ -242,7 +242,7 @@ public class StatefulRegistrationBean {
         return state;
     }
 
-    public SmsPhoneNumberVerification getPhoneNumberVerification() {
+    public SmsPhoneNumberVerificationProcess getPhoneNumberVerification() {
         return phoneNumberVerification;
     }
 

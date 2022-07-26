@@ -6,13 +6,13 @@ import org.connectme.core.interests.impl.jpa.InterestRepository;
 import org.connectme.core.interests.impl.jpa.InterestTermRepository;
 import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.UserManagement;
-import org.connectme.core.userManagement.beans.StatefulLoginBean;
+import org.connectme.core.userManagement.beans.login.StatefulLoginSessionBean;
 import org.connectme.core.userManagement.beans.UserFactoryBean;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
-import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerificationProcess;
 import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,15 +62,15 @@ public class LoginAPITest {
     }
 
     /**
-     * The {@link org.connectme.core.userManagement.beans.StatefulLoginBean} is stored in session under a specific attribute
+     * The {@link StatefulLoginSessionBean} is stored in session under a specific attribute
      * name called "scopedTarget.{defined name}". The name of the session attribute is defined
      * in {@link org.connectme.core.userManagement.api.LoginAPI}. Extract the object from the session.
      *
      * @param session session in which the bean is placed
-     * @return instance of the {@link org.connectme.core.userManagement.beans.StatefulLoginBean}
+     * @return instance of the {@link StatefulLoginSessionBean}
      */
-    private StatefulLoginBean extractLoginBeanFromSession(MockHttpSession session) {
-        return (StatefulLoginBean) session.getAttribute("scopedTarget."+ LoginAPI.SESSION_LOGIN);
+    private StatefulLoginSessionBean extractLoginBeanFromSession(MockHttpSession session) {
+        return (StatefulLoginSessionBean) session.getAttribute("scopedTarget."+ LoginAPI.SESSION_LOGIN);
     }
 
     private void performUntilPhoneNumberVerification(MockHttpSession session, PassedLoginData loginData) throws Exception {
@@ -86,7 +86,7 @@ public class LoginAPITest {
 
     private String performPhoneNumberVerification(MockHttpSession session) throws Exception {
         // extract verification code and pass it to API
-        StatefulLoginBean bean = extractLoginBeanFromSession(session);
+        StatefulLoginSessionBean bean = extractLoginBeanFromSession(session);
 
         client.perform(post("/users/login/verify/start")
                         .session(session))
@@ -100,7 +100,7 @@ public class LoginAPITest {
 
     private void exceedVerificationAttempts(MockHttpSession session) throws Exception {
 
-        for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+        for(int i = 0; i < SmsPhoneNumberVerificationProcess.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
             // 3.1) start verification process
             client.perform(post("/users/login/verify/start")
                             .session(session))
@@ -149,12 +149,12 @@ public class LoginAPITest {
         exceedVerificationAttempts(session);
 
         // -- assert --
-        StatefulLoginBean bean = extractLoginBeanFromSession(session);
+        StatefulLoginSessionBean bean = extractLoginBeanFromSession(session);
         Assertions.assertFalse(bean.getPhoneNumberVerification().isVerified());
         Assertions.assertFalse(bean.getPhoneNumberVerification().isVerificationAttemptCurrentlyAllowed());
 
         // wind blocker timer forward, removes block
-        bean.getPhoneNumberVerification().setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerification.BLOCK_FAILED_ATTEMPT_MINUTES));
+        bean.getPhoneNumberVerification().setLastVerificationAttempt(LocalDateTime.now().minusMinutes(SmsPhoneNumberVerificationProcess.BLOCK_FAILED_ATTEMPT_MINUTES));
         Assertions.assertTrue(bean.getPhoneNumberVerification().isVerificationAttemptCurrentlyAllowed());
 
         Assertions.assertDoesNotThrow(() -> performPhoneNumberVerification(session));

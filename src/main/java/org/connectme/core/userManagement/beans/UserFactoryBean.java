@@ -20,9 +20,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * this bean is meant to convert instances of {@link PassedUserData} into
- * instances of {@link User}. A separate factory is necessary, because the
- * conversion requires processing, like database interactions (e.g. converting the passed set of interest-term-ids to interest-term-entities).
+ * This bean processes the data in a {@link PassedUserData} instance (e.g. verifying the passed interest term ids and
+ * replacing them with interest term objects fetched from database) and converts it to an instance of {@link User}.
+ *
+ * <p>A managed bean is necessary because database interactions are needed for conversion</p>
  * @author Daniel Mehlber
  */
 @Component

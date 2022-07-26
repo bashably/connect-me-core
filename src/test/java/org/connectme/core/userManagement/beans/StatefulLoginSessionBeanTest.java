@@ -6,6 +6,7 @@ import org.connectme.core.interests.impl.jpa.InterestRepository;
 import org.connectme.core.interests.impl.jpa.InterestTermRepository;
 import org.connectme.core.interests.testUtil.InterestRepositoryTestUtil;
 import org.connectme.core.userManagement.UserManagement;
+import org.connectme.core.userManagement.beans.login.StatefulLoginSessionBean;
 import org.connectme.core.userManagement.entities.PassedLoginData;
 import org.connectme.core.userManagement.entities.PassedUserData;
 import org.connectme.core.userManagement.entities.User;
@@ -14,8 +15,8 @@ import org.connectme.core.userManagement.exceptions.VerificationAttemptNotAllowe
 import org.connectme.core.userManagement.exceptions.WrongPasswordException;
 import org.connectme.core.userManagement.exceptions.WrongVerificationCodeException;
 import org.connectme.core.userManagement.impl.jpa.UserRepository;
-import org.connectme.core.userManagement.logic.LoginState;
-import org.connectme.core.userManagement.logic.SmsPhoneNumberVerification;
+import org.connectme.core.userManagement.beans.login.LoginState;
+import org.connectme.core.userManagement.logic.SmsPhoneNumberVerificationProcess;
 import org.connectme.core.userManagement.testUtil.UserRepositoryTestUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class StatefulLoginBeanTest {
+public class StatefulLoginSessionBeanTest {
 
     @Autowired
     private InterestRepository interestRepository;
@@ -42,7 +43,7 @@ public class StatefulLoginBeanTest {
     private UserRepository userRepository;
 
     @Autowired
-    private StatefulLoginBean statefulLoginBean;
+    private StatefulLoginSessionBean statefulLoginSessionBean;
 
     @Autowired
     private UserAuthenticationBean userAuthenticationBean;
@@ -63,19 +64,19 @@ public class StatefulLoginBeanTest {
 
         // -- act --
         // init bean
-        statefulLoginBean.reset();
+        statefulLoginSessionBean.reset();
         // pass login data of created user
-        statefulLoginBean.passLoginData(new PassedLoginData(user.getUsername(), user.getPasswordHash()));
+        statefulLoginSessionBean.passLoginData(new PassedLoginData(user.getUsername(), user.getPasswordHash()));
         // start phone number verification
-        statefulLoginBean.startAndWaitForVerification();
+        statefulLoginSessionBean.startAndWaitForVerification();
         // pass verification code
-        String code = statefulLoginBean.getPhoneNumberVerification().getVerificationCode();
-        statefulLoginBean.checkVerificationCode(code);
+        String code = statefulLoginSessionBean.getPhoneNumberVerification().getVerificationCode();
+        statefulLoginSessionBean.checkVerificationCode(code);
 
         // -- assert --
-        Assertions.assertEquals(LoginState.PROFILE_VERIFIED, statefulLoginBean.getState());
-        Assertions.assertEquals(user.getUsername(), statefulLoginBean.getLoginData().getUsername());
-        Assertions.assertEquals(user.getPasswordHash(), statefulLoginBean.getLoginData().getPasswordHash());
+        Assertions.assertEquals(LoginState.PROFILE_VERIFIED, statefulLoginSessionBean.getState());
+        Assertions.assertEquals(user.getUsername(), statefulLoginSessionBean.getLoginData().getUsername());
+        Assertions.assertEquals(user.getPasswordHash(), statefulLoginSessionBean.getLoginData().getPasswordHash());
     }
 
     @Test
@@ -95,13 +96,13 @@ public class StatefulLoginBeanTest {
         PassedLoginData wrong = new PassedLoginData(user.getUsername(), UserFactoryBean.hash(wrongPassword));
 
         // -- act --
-        statefulLoginBean.reset();
-        Assertions.assertThrows(WrongPasswordException.class, () -> statefulLoginBean.passLoginData(wrong));
-        Assertions.assertEquals(LoginState.INIT, statefulLoginBean.getState());
+        statefulLoginSessionBean.reset();
+        Assertions.assertThrows(WrongPasswordException.class, () -> statefulLoginSessionBean.passLoginData(wrong));
+        Assertions.assertEquals(LoginState.INIT, statefulLoginSessionBean.getState());
 
-        statefulLoginBean.passLoginData(correct);
+        statefulLoginSessionBean.passLoginData(correct);
         // -- assert --
-        Assertions.assertEquals(LoginState.CORRECT_LOGIN_DATA_PASSED, statefulLoginBean.getState());
+        Assertions.assertEquals(LoginState.CORRECT_LOGIN_DATA_PASSED, statefulLoginSessionBean.getState());
     }
 
     @Test
@@ -114,16 +115,16 @@ public class StatefulLoginBeanTest {
         PassedLoginData passedLoginData = new PassedLoginData(user.getUsername(), user.getPasswordHash());
 
         // -- act and assert--
-        statefulLoginBean.reset();
-        statefulLoginBean.passLoginData(passedLoginData);
+        statefulLoginSessionBean.reset();
+        statefulLoginSessionBean.passLoginData(passedLoginData);
 
         // exceed attempts
         exceedVerificationAttempts();
 
-        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, () -> statefulLoginBean.startAndWaitForVerification());
+        Assertions.assertThrows(VerificationAttemptNotAllowedException.class, () -> statefulLoginSessionBean.startAndWaitForVerification());
 
         // -- assert --
-        Assertions.assertEquals(LoginState.CORRECT_LOGIN_DATA_PASSED, statefulLoginBean.getState());
+        Assertions.assertEquals(LoginState.CORRECT_LOGIN_DATA_PASSED, statefulLoginSessionBean.getState());
     }
 
     @Test
@@ -136,11 +137,11 @@ public class StatefulLoginBeanTest {
         PassedLoginData passedLoginData = new PassedLoginData("xx"+user.getUsername()+"xx", user.getPasswordHash());
 
         // -- act and assert--
-        statefulLoginBean.reset();
-        Assertions.assertThrows(NoSuchUserException.class, () -> statefulLoginBean.passLoginData(passedLoginData));
+        statefulLoginSessionBean.reset();
+        Assertions.assertThrows(NoSuchUserException.class, () -> statefulLoginSessionBean.passLoginData(passedLoginData));
 
         // -- assert --
-        Assertions.assertEquals(LoginState.INIT, statefulLoginBean.getState());
+        Assertions.assertEquals(LoginState.INIT, statefulLoginSessionBean.getState());
     }
 
     @Test
@@ -154,35 +155,35 @@ public class StatefulLoginBeanTest {
 
         // -- act and assert --
         // init bean
-        statefulLoginBean.reset();
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.checkVerificationCode(""));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.startAndWaitForVerification());
+        statefulLoginSessionBean.reset();
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.checkVerificationCode(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.startAndWaitForVerification());
 
         // pass user data
-        statefulLoginBean.passLoginData(passedLoginData);
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.passLoginData(passedLoginData));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.checkVerificationCode(""));
+        statefulLoginSessionBean.passLoginData(passedLoginData);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.passLoginData(passedLoginData));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.checkVerificationCode(""));
 
         // start phone number verification
-        statefulLoginBean.startAndWaitForVerification();
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.startAndWaitForVerification());
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.passLoginData(passedLoginData));
+        statefulLoginSessionBean.startAndWaitForVerification();
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.startAndWaitForVerification());
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.passLoginData(passedLoginData));
 
         // enter verification code
-        String code = statefulLoginBean.getPhoneNumberVerification().getVerificationCode();
-        statefulLoginBean.checkVerificationCode(code);
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.passLoginData(passedLoginData));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.checkVerificationCode(""));
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.startAndWaitForVerification());
+        String code = statefulLoginSessionBean.getPhoneNumberVerification().getVerificationCode();
+        statefulLoginSessionBean.checkVerificationCode(code);
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.passLoginData(passedLoginData));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.checkVerificationCode(""));
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.startAndWaitForVerification());
 
     }
 
     private void exceedVerificationAttempts() throws Exception {
         // exceed attempts
-        for(int i = 0; i < SmsPhoneNumberVerification.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
-            statefulLoginBean.startAndWaitForVerification();
+        for(int i = 0; i < SmsPhoneNumberVerificationProcess.MAX_AMOUNT_VERIFICATION_ATTEMPTS; i++) {
+            statefulLoginSessionBean.startAndWaitForVerification();
             try {
-                statefulLoginBean.checkVerificationCode("");
+                statefulLoginSessionBean.checkVerificationCode("");
             } catch (WrongVerificationCodeException ignored) {}
         }
     }
@@ -196,15 +197,15 @@ public class StatefulLoginBeanTest {
 
         PassedLoginData passedLoginData = new PassedLoginData(user.getUsername(), user.getPasswordHash());
 
-        statefulLoginBean.reset();
-        statefulLoginBean.passLoginData(passedLoginData);
+        statefulLoginSessionBean.reset();
+        statefulLoginSessionBean.passLoginData(passedLoginData);
 
         // exceed attempts
         exceedVerificationAttempts();
 
         // -- act and assert --
-        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginBean.reset());
-        Assertions.assertEquals(LoginState.CORRECT_LOGIN_DATA_PASSED, statefulLoginBean.getState());
+        Assertions.assertThrows(ForbiddenInteractionException.class, () -> statefulLoginSessionBean.reset());
+        Assertions.assertEquals(LoginState.CORRECT_LOGIN_DATA_PASSED, statefulLoginSessionBean.getState());
     }
 
 }
