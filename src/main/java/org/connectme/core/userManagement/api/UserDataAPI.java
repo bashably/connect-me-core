@@ -61,10 +61,10 @@ public class UserDataAPI {
                 interestTerms.add(interests.fetchInterestTerm(id));
             }
         } catch (NoSuchInterestTermException e) {
-            log.warn(String.format("cannot add interest terms to user profile: invalid interest term id passed: %s", e.getMessage()), e);
+            log.warn("cannot add interest terms to user profile: invalid interest term id passed: {}", e.getMessage(), e);
             throw e;
         } catch (InternalErrorException e) {
-            log.fatal(String.format("cannot add interest terms to user profile due to an internal error: %s", e.getMessage()), e);
+            log.fatal("cannot add interest terms to user profile due to an internal error: {}", e.getMessage(), e);
             throw e;
         }
 

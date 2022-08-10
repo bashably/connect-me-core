@@ -80,9 +80,9 @@ public class UserAuthenticationBean {
 
         // cache username and auth token
         loggedInUsersCache.put(user.getUsername(), user.getAuthToken());
-        log.debug(String.format("stored new authentication token %s of user '%s' in cache", jwtToken, user.getUsername()));
+        log.debug("stored new authentication token %s of user '{}' in cache", jwtToken, user.getUsername());
 
-        log.info(String.format("user '%s' was successfully logged in", user.getUsername()));
+        log.info("user '{}' was successfully logged in", user.getUsername());
         return jwtToken;
     }
 
@@ -104,11 +104,11 @@ public class UserAuthenticationBean {
                     .withClaim("authToken", user.getAuthToken())
                     .sign(algorithm);
         } catch (JWTCreationException e){
-            log.error(String.format("cannot assemble JWT token because of fatal internal error: " + e.getMessage()));
+            log.error("cannot assemble JWT token because of fatal internal error: " + e.getMessage());
             throw new InternalErrorException("cannot create new jwt token: "+ e.getMessage(), e);
         }
 
-        log.debug(String.format("assembled new JWT token %s for user '%s'", jwtToken, user.getUsername()));
+        log.debug("assembled new JWT token %s for user '{}'", jwtToken, user.getUsername());
         return jwtToken;
     }
 
@@ -139,7 +139,7 @@ public class UserAuthenticationBean {
     public void logout(final User user) throws UserDataInsufficientException, InternalErrorException, NoSuchUserException {
         // remove user authentication token from cache
         loggedInUsersCache.remove(user.getUsername());
-        log.debug(String.format("removed authentication token of user '%s' from cache", user.getUsername()));
+        log.debug("removed authentication token of user '{}' from cache", user.getUsername());
 
         // remove user authentication token from database
         user.setAuthToken(null);
@@ -153,7 +153,7 @@ public class UserAuthenticationBean {
             throw e;
         }
 
-        log.info(String.format("user '%s' was successfully logged out", user.getUsername()));
+        log.info("user '{}' was successfully logged out", user.getUsername());
     }
 
     /**
@@ -194,17 +194,17 @@ public class UserAuthenticationBean {
             log.warn("authentication failed due to invalid JWT token: " + e.getMessage());
             throw new FailedAuthenticationException();
         } catch (RuntimeException e){
-            log.error(String.format("cannot authenticate user '%s' due to internal error: %s", username, e.getMessage()));
+            log.error("cannot authenticate user '{}' due to internal error: {}", username, e.getMessage());
             throw new InternalErrorException("cannot check jwt token due to an fatal internal error: " + e.getMessage(), e);
         }
 
         // check if user is authenticated
         if(!isAuthenticated(username, authToken)){
-            log.warn(String.format("authentication failed: user '%s' is not logged in", HtmlUtils.htmlEscape(username)));
+            log.warn("authentication failed: user '{}' is not logged in", HtmlUtils.htmlEscape(username));
             throw new FailedAuthenticationException();
         }
 
-        log.info(String.format("authentication successful: user '%s' is logged in", HtmlUtils.htmlEscape(username)));
+        log.info("authentication successful: user '{}' is logged in", HtmlUtils.htmlEscape(username));
         return username;
     }
 
