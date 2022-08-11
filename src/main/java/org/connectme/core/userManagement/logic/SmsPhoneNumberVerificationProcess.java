@@ -83,17 +83,15 @@ public class SmsPhoneNumberVerificationProcess {
                 return true;
             } else {
                 // CASE: not enough time has passed, prohibit another verification attempt
-                log.warn(String.format(
-                        "another verification attempt is currently not allowed because the user had %d/%d attempts and" +
-                                " must wait for %d minutes with his last attempt at %s", verificationAttempts, MAX_AMOUNT_VERIFICATION_ATTEMPTS,
-                                BLOCK_FAILED_ATTEMPT_MINUTES, lastVerificationAttempt.toString()
-                ));
+                log.warn("another verification attempt is currently not allowed because the user had {}/{} attempts and" +
+                                " must wait for {} minutes with his last attempt at {}", verificationAttempts, MAX_AMOUNT_VERIFICATION_ATTEMPTS,
+                                BLOCK_FAILED_ATTEMPT_MINUTES, lastVerificationAttempt.toString());
                 return false;
             }
         } else if(isPendingVerificationAttempt()) {
             // there still is a pending verification attempt. Another attempt is currently not allowed.
-            log.warn(String.format("another verification attempt is currently not allowed because there is still a pending verification process" +
-                    " since %s", lastVerificationAttempt.toString()));
+            log.warn("another verification attempt is currently not allowed because there is still a pending verification process" +
+                    " since {}", lastVerificationAttempt.toString());
             return false;
         } else {
             log.debug("another verification attempt is allowed");
@@ -122,10 +120,10 @@ public class SmsPhoneNumberVerificationProcess {
         verificationAttempts++;
 
         if(verificationCode.equals(passedVerificationCode)) {
-            log.debug(String.format("passed verification code '%s' was correct", passedVerificationCode));
+            log.debug("passed verification code '{}' was correct", passedVerificationCode);
             verified = true;
         } else {
-            log.warn(String.format("passed verification code '%s' was wrong", HtmlUtils.htmlEscape(passedVerificationCode)));
+            log.warn("passed verification code '{}' was wrong", HtmlUtils.htmlEscape(passedVerificationCode));
             verified = false;
             verificationCode = null;
             throw new WrongVerificationCodeException(passedVerificationCode);

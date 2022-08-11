@@ -54,24 +54,24 @@ public class JpaUserManagement implements UserManagement {
         log.debug("creating new user from userdata...");
         try {
             if (userRepository.existsById(userdata.getUsername())) {
-                log.warn(String.format("cannot create user with username '%s' because it is already taken",
-                        HtmlUtils.htmlEscape(userdata.getUsername())));
+                log.warn("cannot create user with username '{}' because it is already taken",
+                        HtmlUtils.htmlEscape(userdata.getUsername()));
                 throw new UsernameAlreadyTakenException(userdata.getUsername());
             } else {
                 userRepository.save(userdata);
             }
         } catch (DataIntegrityViolationException e) {
             // if database integrity rules or checks (data length, regex, etc.) are not met, this runtime exception is thrown
-            log.warn(String.format("cannot create new user '%s' because database does not accept passed user data: %s",
-                    HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage()));
+            log.warn("cannot create new user '{}' because database does not accept passed user data: {}",
+                    HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage());
             throw new UserDataInsufficientException(e);
         } catch (RuntimeException e) {
-            log.error(String.format("cannot create new user '%s': an unexpected runtime error occurred: %s",
-                    HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage()));
+            log.error("cannot create new user '{}': an unexpected runtime error occurred: {}",
+                    HtmlUtils.htmlEscape(userdata.getUsername()), e.getMessage());
             throw new InternalErrorException("cannot create new user", e);
         }
-        log.debug(String.format("successfully created new user '%s' and persisted it in database",
-                HtmlUtils.htmlEscape(userdata.getUsername())));
+        log.debug("successfully created new user '{}' and persisted it in database",
+                HtmlUtils.htmlEscape(userdata.getUsername()));
     }
 
     @Override

@@ -41,18 +41,18 @@ public class InterestAPI {
     @GetMapping(value = "/search/term", consumes = "text/plain", produces = "application/json")
     public List<InterestTerm> searchTerms(@RequestParam("term") final String searchTerm,
                                           @RequestAttribute(UserAuthenticationFilter.HTTP_ATTR_USER) final User currentUser) throws InternalErrorException {
-        log.debug(String.format("user '%s' requested all terms for search term '%s'", HtmlUtils.htmlEscape(currentUser.getUsername()), HtmlUtils.htmlEscape(searchTerm)));
+        log.debug("user '{}' requested all terms for search term '{}'", HtmlUtils.htmlEscape(currentUser.getUsername()), HtmlUtils.htmlEscape(searchTerm));
         // search for terms in database
         List<InterestTerm> foundTerms;
         try {
             foundTerms = interests.searchInterestTerms(searchTerm);
         } catch (InternalErrorException e) {
-            log.fatal(String.format("cannot search interest terms for search term '%s' due to an internal error: %s",
-                    HtmlUtils.htmlEscape(searchTerm), e.getMessage()), e);
+            log.fatal("cannot search interest terms for search term '{}' due to an internal error: %s",
+                    HtmlUtils.htmlEscape(searchTerm), e.getMessage(), e);
             throw e;
         }
 
-        log.debug(String.format("search completed: %d term(s) were found", foundTerms.size()));
+        log.debug("search completed: {} term(s) were found", foundTerms.size());
         return foundTerms;
     }
 
@@ -69,8 +69,8 @@ public class InterestAPI {
     public InterestTerm getTermOfInterestInLanguage(@PathVariable("id") final long id,
                                                     @PathVariable("lang") final String languageCode,
                                                     @RequestAttribute(UserAuthenticationFilter.HTTP_ATTR_USER) final User currentUser) throws NoSuchInterestException, NoInterestTermsFoundException, InternalErrorException {
-        log.debug(String.format("user '%s' requested term for interest id:%d in language code '%s'",
-                HtmlUtils.htmlEscape(currentUser.getUsername()), id, HtmlUtils.htmlEscape(languageCode)));
+        log.debug("user '{}' requested term for interest id:{} in language code '{}'",
+                HtmlUtils.htmlEscape(currentUser.getUsername()), id, HtmlUtils.htmlEscape(languageCode));
 
         // fetch interest with id
         Interest interestRoot;
@@ -78,7 +78,7 @@ public class InterestAPI {
             interestRoot = interestRepository.findById(id).orElseThrow(() -> new NoSuchInterestException(id));
         } catch (NoSuchInterestException e) {
             // no interest root with interest id exists
-            log.warn(String.format("cannot fetch interest term: there is no interest root with id:%d in database", id));
+            log.warn("cannot fetch interest term: there is no interest root with id:{} in database", id);
             throw e;
         }
 
@@ -87,11 +87,11 @@ public class InterestAPI {
         try {
             interestTerm = interests.getInterestTermInLanguage(interestRoot, languageCode);
         } catch (NoInterestTermsFoundException e) {
-            log.warn(String.format("cannot fetch interest term: no interest term in language '%s' or default language 'en' were found",
-                    HtmlUtils.htmlEscape(languageCode)));
+            log.warn("cannot fetch interest term: no interest term in language '{}' or default language 'en' were found",
+                    HtmlUtils.htmlEscape(languageCode));
             throw e;
         } catch (InternalErrorException e) {
-            log.fatal(String.format("cannot fetch interest term: an internal error occurred while fetching interest term from interest root id:%d - %s", id, e.getMessage()), e);
+            log.fatal("cannot fetch interest term: an internal error occurred while fetching interest term from interest root id:{} - {}", id, e.getMessage(), e);
             throw new InternalErrorException(String.format("cannot fetch interst term of interest root id:%d", id), e);
         }
 

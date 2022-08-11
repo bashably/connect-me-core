@@ -156,7 +156,7 @@ public class RegistrationAPI {
             final User newUser = userFactory.build(registration.getPassedUserData());
             userManagement.createNewUser(newUser);
 
-            log.info(String.format("registration of new user '%s' was successful", newUser.getUsername()));
+            log.info("registration of new user '%s' was successful", newUser.getUsername());
         } catch (InternalErrorException e) {
             log.warn("cannot create new user due to an internal error: " + e.getMessage());
             throw e;

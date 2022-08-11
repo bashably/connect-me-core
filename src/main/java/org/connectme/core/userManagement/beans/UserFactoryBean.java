@@ -66,7 +66,7 @@ public class UserFactoryBean {
             try {
                 term = interests.fetchInterestTerm(interestTermId);
             } catch (NoSuchInterestTermException e) {
-                log.warn(String.format("cannot convert to user entity: passed interest term with id:%d does not exist", interestTermId));
+                log.warn("cannot convert to user entity: passed interest term with id:{} does not exist", interestTermId);
                 throw new UserDataInsufficientException(e);
             }
 

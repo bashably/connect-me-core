@@ -74,8 +74,8 @@ public class StatefulLoginSessionBean {
      */
     public void reset() throws ForbiddenInteractionException {
         if(!isResetAllowed()) {
-            log.warn(String.format("illegal access attempt: login reset is currently not allowed (current state: %s)",
-                    state.name()));
+            log.warn("illegal access attempt: login reset is currently not allowed (current state: {})",
+                    state.name());
             throw new ForbiddenInteractionException("reset is currently not allowed");
         } else {
             state = LoginState.INIT;
@@ -111,21 +111,21 @@ public class StatefulLoginSessionBean {
      */
     public void passLoginData(final PassedLoginData passedLoginData) throws ForbiddenInteractionException, NoSuchUserException, WrongPasswordException, InternalErrorException {
         if(state != LoginState.INIT) {
-            log.warn(String.format("illegal access attempt: login is in state '%s' and cannot accept user data", state.name()));
-            throw new ForbiddenInteractionException(String.format("cannot pass login data because login is in state %s", state.name()));
+            log.warn("illegal access attempt: login is in state '{}' and cannot accept user data", state.name());
+            throw new ForbiddenInteractionException(String.format("cannot pass login data because login is in state {}", state.name()));
         }
 
         // try to load userdata
         User user = userManagement.fetchUserByUsername(passedLoginData.getUsername());
-        log.debug(String.format("user with username '%s' successfully loaded", HtmlUtils.htmlEscape(passedLoginData.getUsername())));
+        log.debug("user with username '{}' successfully loaded", HtmlUtils.htmlEscape(passedLoginData.getUsername()));
 
         // check if password is correct
         if(user.getPasswordHash().equals(passedLoginData.getPasswordHash())) {
             state = LoginState.CORRECT_LOGIN_DATA_PASSED;
             this.loginData = passedLoginData;
-            log.debug(String.format("user '%s' entered correct password", passedLoginData.getUsername()));
+            log.debug("user '{}' entered correct password", passedLoginData.getUsername());
         } else {
-            log.warn(String.format("user '%s' entered wrong password", passedLoginData.getUsername()));
+            log.warn("user '{}' entered wrong password", passedLoginData.getUsername());
             throw new WrongPasswordException();
         }
     }
@@ -140,13 +140,13 @@ public class StatefulLoginSessionBean {
      */
     public void startAndWaitForVerification() throws ForbiddenInteractionException, VerificationAttemptNotAllowedException {
         if (state != LoginState.CORRECT_LOGIN_DATA_PASSED) {
-            log.warn(String.format("illegal access attempt: login is in state %s and cannot start phone number verification", state.name()));
+            log.warn("illegal access attempt: login is in state {} and cannot start phone number verification", state.name());
             throw new ForbiddenInteractionException(
                     String.format("login is in state %s and cannot start phone number verification", state.name()));
         } else {
             phoneNumberVerification.startVerificationAttempt();
             state = LoginState.VERIFICATION_PENDING;
-            log.info(String.format("user '%s' started phone number verification process in login", loginData.getUsername()));
+            log.info("user '{}' started phone number verification process in login", loginData.getUsername());
         }
     }
 
@@ -160,7 +160,7 @@ public class StatefulLoginSessionBean {
      */
     public void checkVerificationCode(final String passedVerificationCode) throws ForbiddenInteractionException, WrongVerificationCodeException {
         if(state != LoginState.VERIFICATION_PENDING) {
-            log.warn(String.format("illegal access attempt: login is in state %s and cannot accept verification codes", state.name()));
+            log.warn("illegal access attempt: login is in state {} and cannot accept verification codes", state.name());
             throw new ForbiddenInteractionException(
                     String.format("login is in state %s and cannot accept verification codes", state.name()));
         }

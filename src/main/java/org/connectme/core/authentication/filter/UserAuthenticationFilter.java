@@ -85,11 +85,11 @@ public class UserAuthenticationFilter implements Filter {
         try {
             authenticatedUser = authenticationBean.authenticateAndFetchUser(jwt);
         } catch (NoSuchUserException | FailedAuthenticationException e) {
-            log.warn(String.format("user authentication with jwt token [%s] failed: " + e.getMessage()));
+            log.warn("user authentication with jwt token [{}] failed: " , e.getMessage());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         } catch (InternalErrorException e) {
-            log.fatal(String.format("cannot complete user authentication due to an internal error using JWT Token [%s] - %s", jwt, e.getMessage()), e);
+            log.fatal("cannot complete user authentication due to an internal error using JWT Token [{}] - {}", jwt, e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
